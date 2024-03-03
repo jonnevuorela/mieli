@@ -1,0 +1,78 @@
+:root {
+  font-family: Inter, Avenir, Helvetica, Arial, sans-serif;
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 400;
+
+  color: #0f0f0f;
+  background-color: #f6f6f6;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-text-size-adjust: 100%;
+}
+
+.titlebar {
+  height: 30px;
+  background: #3f0886;
+  user-select: none;
+  display: flex;
+  align-items: center; /* Aligns items vertically in the center */
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+}
+
+.titlebar-title {
+  color: #e3d7fd;
+  font-size: 16px;
+  font-weight: regular;
+  margin-left: 5px;
+  margin-right: auto; /* Pushes the title to the start */
+}
+
+.titlebar-button {
+  display: flex;
+  justify-content: flex-end;
+  padding-right: 10px;
+  align-items: center;
+  width: 25px;
+  height: 30px;
+}
+
+.titlebar-button:hover {
+  background: #310769;
+}
+
+body {
+  margin-top: 30px; 
+}
+
+#addNew {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    color: #f6f6f6;
+    background-color: #2f2f2f;
+  }
+
+  a:hover {
+    color: #24c8db;
+  }
+
+  input,
+  button {
+    color: #ffffff;
+    background-color: #0f0f0f98;
+  }
+  button:active {
+    background-color: #0f0f0f69;
+  }
+}
