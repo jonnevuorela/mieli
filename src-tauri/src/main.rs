@@ -1,15 +1,18 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-// Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
-#[tauri::command]
-fn add_new(name: &str) -> String {
-    format!("Hello, {}! You've been greeted from Rust!", name)
-}
+use std::fs;
 
+
+#[tauri::command]
+fn write_json(data: String) {
+    fs::write("./src/toughts.json", data).expect("Failed to write file");
+}
 fn main() {
     tauri::Builder::default()
-        .invoke_handler(tauri::generate_handler![add_new])
+        .invoke_handler(tauri::generate_handler![
+            write_json
+        ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

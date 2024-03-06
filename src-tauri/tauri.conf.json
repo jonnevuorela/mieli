@@ -1,25 +1,26 @@
 {
   "build": {
+    "withGlobalTauri": true,
     "beforeDevCommand": "yarn dev",
     "beforeBuildCommand": "yarn build",
     "devPath": "http://localhost:1420",
     "distDir": "../dist"
   },
   "package": {
-    "productName": "mieli2",
+    "productName": "Mieli",
     "version": "0.0.0"
   },
   "tauri": {
     "allowlist": {
-      "all": false,
+      "all": true,
       "shell": {
-        "all": false,
+        "all": true,
         "open": true
       }
     },
     "windows": [
       {
-        "title": "mieli2",
+        "title": "Mieli",
         "width": 800,
         "height": 600
       }

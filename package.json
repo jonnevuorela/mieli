@@ -9,14 +9,12 @@
     "preview": "vite preview",
     "tauri": "tauri"
   },
-  "dependencies": {
-    "@tauri-apps/api": "^1"
-  },
   "devDependencies": {
     "@sveltejs/adapter-static": "^3.0.1",
     "@sveltejs/vite-plugin-svelte": "^3.0.1",
+    "@tauri-apps/api": "^1.5.3",
     "@tauri-apps/cli": "^1.5.10",
-    "svelte": "^4.2.8",
+    "svelte": "^4.2.12",
     "vite": "^5.0.0"
   }
 }
