@@ -4,37 +4,62 @@
 
     const passiveMode = 'passive';
     const inputMode = 'text_area_visible';
-
     let currentState = passiveMode;
-    let thoughtId = 1;
-    
+
     let title = "";
     let jsonOutput;
 
+    let lastId;
+    let thoughtId;
+
+    //Fetch last id from backend
+    async function fetchLastId(){
+        try{
+            lastId = await invoke('get_last_id');
+            console.log(`lastId: ${lastId}`);
+        }catch(error){
+            console.error('Error fetching last id', error);
+        }
+    };
+    //incremention
+    async function nextId(){
+        await fetchLastId();
+        console.log(`lastId in nextId(): ${lastId}`);
+        if (lastId === undefined){
+            thoughtId = 1;
+        } else {
+            thoughtId = lastId + 1
+        }
+    };
+
+    
 
     function addButtonClick(){
         console.log("addButtonClick");
         currentState = inputMode;
-    
-    };
-    function okButtonClick(){
-        console.log("okButtonClick");
-        currentState = passiveMode;
-        jsonOutput = JSON.stringify([{
-            title,
-            id: thoughtId++,
-        }]);
+        
+        };
+        async function okButtonClick(){
+            console.log("okButtonClick");
+            currentState = passiveMode;
+            await nextId();
+            jsonOutput = JSON.stringify([{
+                title,
+                id: thoughtId
+            }]);
 
-        invoke('write_json', {data: jsonOutput}).then(()=>{
-            console.log('data passed to backend');
-        }).catch((error)=>{
-            console.error('Error writing data', error);
+        //Pass new data to backend
+        await invoke("write_json", { data: jsonOutput })
+        .then(() => {
+            console.log("Data passed to backend");
+        })
+        .catch((error) => {
+            console.error("Error writing data", error);
         });
 
-
-        let parsedJson = JSON.parse(jsonOutput);
-        console.log('parsedJson');
-        console.log(parsedJson);
+            let parsedJson = JSON.parse(jsonOutput);
+            console.log('parsedJson');
+            console.log(parsedJson);
     };
 
 
@@ -51,11 +76,19 @@
     </div>
 {/if}
 <div >
-    <button style="border-radius: 5px" type="submit" on:click={addButtonClick}>
+    <button type="submit" on:click={addButtonClick}>
         Add a tought
     </button>
 </div>
 
 <pre>{JSON.stringify(jsonOutput, null, 2)}</pre>
+<div>
+    {#if lastId > 0}
+    <p>LastId: {lastId}</p>
+    {/if}
+    <button type="submit" id="debug" on:click={fetchLastId}>
+        Fetch last id
+    </button>
+</div>
 
 

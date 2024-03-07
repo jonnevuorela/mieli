@@ -1,0 +1,21 @@
+:root {
+    --bg-color-dark: #333333;
+    --input-color-dark: #444444;
+    --text-color-dark: #aaaaaa;
+}
+body {
+    background-color: var(--bg-color-dark);
+    color: var(--text-color-dark);
+}
+button {
+    border-radius: 3px;
+    background-color: var(--bg-color-dark);
+    color: var(--text-color-dark);
+    border-color: var(--text-color-dark);
+}
+input {
+    border-radius: 3px;
+    background-color: var(--bg-color-dark);
+    color: var(--text-color-dark);
+    border-color: var(--text-color-dark);
+}
