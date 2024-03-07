@@ -80,8 +80,6 @@
         Add a tought
     </button>
 </div>
-
-<pre>{JSON.stringify(jsonOutput, null, 2)}</pre>
 <div>
     {#if lastId > 0}
     <p>LastId: {lastId}</p>

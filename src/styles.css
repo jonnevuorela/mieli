@@ -19,3 +19,32 @@ input {
     color: var(--text-color-dark);
     border-color: var(--text-color-dark);
 }
+#mind {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    padding: 20px;
+    background-color: #f0f0f0; /* Replace with your desired background color */
+    border: 2px solid #333;   /* Replace with your desired border color */
+    border-radius: 10px;
+}
+
+.thought {
+    width: 150px;
+    padding: 10px;
+    border: 2px solid #666;   /* Replace with your desired border color */
+    border-radius: 8px;
+    background-color: #fff;   /* Replace with your desired background color */
+    color: #333;              /* Replace with your desired text color */
+    text-align: center;
+    cursor: grab;
+}
+
+.thought:active {
+    cursor: grabbing;
+}
+
+.thought p {
+    margin: 0;
+}
