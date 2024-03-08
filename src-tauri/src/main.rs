@@ -1,8 +1,8 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
+use serde::{Deserialize, Serialize};
 use std::fs;
-use serde::{Serialize, Deserialize};
 
 #[derive(Serialize, Deserialize)]
 struct Thought {
@@ -10,12 +10,11 @@ struct Thought {
     title: String,
 }
 
-
 #[tauri::command]
-fn get_last_id() -> Result<u32, String>{
+fn get_last_id() -> Result<u32, String> {
     let json_content = include_str!("../src/thoughts.json");
-    let data: Vec<serde_json::Value> = serde_json::from_str(json_content)
-        .map_err(|e| format!("Error parsing JSON: {}", e))?;
+    let data: Vec<serde_json::Value> =
+        serde_json::from_str(json_content).map_err(|e| format!("Error parsing JSON: {}", e))?;
 
     let highest_id = data
         .iter()
@@ -24,7 +23,19 @@ fn get_last_id() -> Result<u32, String>{
         .ok_or_else(|| "No ID found in JSON".to_string())?;
 
     Ok(highest_id as u32)
-    }
+}
+
+#[tauri::command]
+fn read_json() -> Result<String, String> {
+    let json_content = include_str!("../src/thoughts.json");
+    let data: Vec<Thought> = serde_json::from_str(json_content)
+        .map_err(|e| format!("Error parsing JSON: {}(in fn read_json)", e))?;
+
+    let json_content = serde_json::to_string(&data)
+        .map_err(|e| format!("Error converting JSON to String: {} (in fn read_json)", e))?;
+
+    Ok(json_content)
+}
 
 #[tauri::command]
 fn write_json(data: String) {
@@ -37,7 +48,10 @@ fn write_json(data: String) {
 
     if let Ok(data) = serde_json::from_str::<Vec<Thought>>(&data) {
         for new_thought in data {
-            if let Some(existing_thought) = thought.iter_mut().find(|thought| thought.id == new_thought.id) {
+            if let Some(existing_thought) = thought
+                .iter_mut()
+                .find(|thought| thought.id == new_thought.id)
+            {
                 //for updating existing one
                 *existing_thought = new_thought;
             } else {
@@ -51,10 +65,7 @@ fn write_json(data: String) {
 }
 fn main() {
     tauri::Builder::default()
-        .invoke_handler(tauri::generate_handler![
-            get_last_id,
-            write_json
-        ])
+        .invoke_handler(tauri::generate_handler![get_last_id, write_json, read_json])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
