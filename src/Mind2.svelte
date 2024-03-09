@@ -2,10 +2,8 @@
     import { onMount } from "svelte";
 
     import { invoke } from "@tauri-apps/api/tauri";
-    import AddNew from "./AddNew.svelte";
-    import App from "./App.svelte";
 
-    let mind;
+    let Mind;
     let thoughts = [];
     let dropped = [];
     let status = "";
@@ -24,11 +22,15 @@
     });
 
     function handleDragEnter(e) {
-        status = "You are dragging over the " + e.target.getAttribute("id");
+        status =
+            "you are dragging the " +
+            e.target.getAttribute("id").target.getAttribute("id");
     }
 
     function handleDragLeave(e) {
-        status = "You left the " + e.target.getAttribute("id");
+        status =
+            "You left the " +
+            e.target.getAttribute("id").target.getAttribute("id");
     }
 
     function handleDragDrop(e) {
@@ -58,7 +60,26 @@
     }
 
     function handleDragEnd(e) {
-        status = "You let the thought " + e.target.id + "go.";
+        e.preventDefault();
+        const element_id = e.dataTransfer.getData("text");
+        const target_id = e.target.id;
+
+        if (element_id !== target_id) {
+            const draggedIndex = thoughts.findIndex(
+                (thought) => thought.id == target_id,
+            );
+
+            const targetIndex = thoughts.findIndex(
+                (thought) => thought.id == target_id,
+            );
+
+            thoughts.splice(draggedIndex, 1);
+            thoughts.splice(targetIndex, 0, thoughts[draggedIndex]);
+
+            dropped = thoughts.map((thought) => thought.id);
+            status = "You dropped thought " + element_id + "into the mind";
+            status = "You let the thought " + e.target.id + "go.";
+        }
     }
 
     function handleDragOver(e) {
@@ -67,16 +88,15 @@
 </script>
 
 <h2 id="app_status">Drag status: {status}</h2>
-<h1>Mind</h1>
 
 <div
     role="main"
     id="Mind"
-    bind:this={mind}
+    bind:this={Mind}
     on:dragenter={handleDragEnter}
     on:dragleave={handleDragLeave}
     on:drop={handleDragDrop}
-    on:dragover={handleDragOver}
+    ondragover="return false"
 >
     {#each thoughts as thought (thought.id)}
         {#if !dropped.includes(thought.id)}

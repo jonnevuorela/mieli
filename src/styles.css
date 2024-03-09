@@ -28,7 +28,7 @@ input {
     -webkit-user-select: none;
 }
 
-#mind {
+#drop_zone {
     background-color: #eee;
     border: #999 1px solid;
     width: 280px;
@@ -37,7 +37,7 @@ input {
     font-size: 19px;
 }
 
-.thought {
+.objects {
     display: inline-block;
     background-color: #fff3cc;
     border: #dfbc6a 1px solid;
