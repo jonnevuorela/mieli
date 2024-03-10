@@ -6,6 +6,9 @@
     let mouseOffset = { x: 0, y: 0 };
     let mousePosition = { x: 0, y: 0 };
     let thoughts = [];
+    let activeThought;
+    // return index of active thought for handleDragMove()
+    let activeIndex = null;
 
     onMount(async () => {
         try {
@@ -22,9 +25,16 @@
             console.log("Error invoking thoughts", error);
         }
     });
+    function findThoughtIndexById(activeThought) {
+        return thoughts.findIndex((thought) => thought.id === activeThought);
+    }
 
-    function handleDragStart(e) {
+    async function handleDragStart(e) {
         isDragging = true;
+
+        const activeThought = event.target.dataset.thoughtId;
+        activeIndex = findThoughtIndexById(+activeThought);
+
         mouseOffset = {
             x: e.clientX - e.target.getBoundingClientRect().left,
             y: e.clientY - e.target.getBoundingClientRect().top,
@@ -34,20 +44,22 @@
         isDragging = false;
     }
 
-    function handleDragMove(e) {
+    async function handleDragMove(e) {
         if (isDragging) {
             mousePosition = {
                 x: e.clientX,
                 y: e.clientY,
             };
 
-            thoughts[0].el.style.left = `${mousePosition.x - mouseOffset.x}px`;
-            thoughts[0].el.style.top = `${mousePosition.y - mouseOffset.y}px`;
+            thoughts[activeIndex].el.style.left =
+                `${mousePosition.x - mouseOffset.x}px`;
+            thoughts[activeIndex].el.style.top =
+                `${mousePosition.y - mouseOffset.y}px`;
         }
     }
 </script>
 
-<div id="mind" on:mousemove={handleDragMove}>
+<div id="mind" role="main" on:mousemove={handleDragMove}>
     {#each thoughts as thought (thought.id)}
         <div
             role="main"
@@ -56,6 +68,7 @@
             style="left: {thought.x}px; top: {thought.y}px;"
             on:mousedown={handleDragStart}
             on:mouseup={handleDragEnd}
+            data-thought-id={thought.id}
         >
             {thought.title}
             #{thought.id}
@@ -76,6 +89,5 @@
         width: 100px;
         height: 100px;
         background-color: #ff5733; /* some color for the thoughts */
-        cursor: move;
     }
 </style>
