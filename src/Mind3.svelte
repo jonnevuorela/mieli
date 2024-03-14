@@ -32,7 +32,7 @@
     async function handleDragStart(e) {
         isDragging = true;
 
-        const activeThought = event.target.dataset.thoughtId;
+        const activeThought = e.target.dataset.thoughtId;
         activeIndex = findThoughtIndexById(+activeThought);
 
         mouseOffset = {
@@ -51,10 +51,22 @@
                 y: e.clientY,
             };
 
+            // track position
             thoughts[activeIndex].el.style.left =
                 `${mousePosition.x - mouseOffset.x}px`;
             thoughts[activeIndex].el.style.top =
                 `${mousePosition.y - mouseOffset.y}px`;
+
+            // update thoughts array
+            thoughts[activeIndex].x = parseInt(
+                thoughts[activeIndex].el.style.left,
+            );
+            thoughts[activeIndex].y = parseInt(
+                thoughts[activeIndex].el.style.top,
+            );
+
+            const data = JSON.stringify(thoughts);
+            await invoke("write_json", { data });
         }
     }
 </script>
@@ -62,7 +74,7 @@
 <div id="mind" role="main" on:mousemove={handleDragMove}>
     {#each thoughts as thought (thought.id)}
         <div
-            role="main"
+            role="application"
             bind:this={thought.el}
             class="thought"
             style="left: {thought.x}px; top: {thought.y}px;"
@@ -88,6 +100,6 @@
         position: absolute;
         width: 100px;
         height: 100px;
-        background-color: #ff5733; /* some color for the thoughts */
+        background-color: #ff5733;
     }
 </style>

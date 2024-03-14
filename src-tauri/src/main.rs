@@ -8,6 +8,8 @@ use std::fs;
 struct Thought {
     id: u32,
     title: String,
+    x: u32,
+    y: u32,
 }
 
 #[tauri::command]

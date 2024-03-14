@@ -1,10 +1,20 @@
 [
   {
     "id": 1,
-    "title": "yee"
+    "title": "Yeet",
+    "x": 24,
+    "y": 98
   },
   {
     "id": 2,
-    "title": "skeet"
+    "title": "Skirt",
+    "x": 171,
+    "y": 56
+  },
+  {
+    "id": 3,
+    "title": "Kissa",
+    "x": 343,
+    "y": 31
   }
 ]
