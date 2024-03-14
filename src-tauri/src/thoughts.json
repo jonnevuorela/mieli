@@ -1,20 +1,23 @@
 [
   {
     "id": 1,
-    "title": "Yeet",
-    "x": 24,
-    "y": 98
+    "title": "yeeyee",
+    "relation_id": 0,
+    "x": 178,
+    "y": 124
   },
   {
     "id": 2,
-    "title": "Skirt",
-    "x": 171,
-    "y": 56
+    "title": "yeetus",
+    "relation_id": 3,
+    "x": 377,
+    "y": 83
   },
   {
     "id": 3,
-    "title": "Kissa",
-    "x": 343,
-    "y": 31
+    "title": "yeet",
+    "relation_id": 2,
+    "x": 35,
+    "y": 54
   }
 ]

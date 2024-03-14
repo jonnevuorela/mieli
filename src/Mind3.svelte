@@ -2,6 +2,10 @@
     import { onMount } from "svelte";
     import { invoke } from "@tauri-apps/api";
 
+    let x1 = 0;
+    let y1 = 0;
+    let x2 = 0;
+    let y2 = 0;
     let isDragging = false;
     let mouseOffset = { x: 0, y: 0 };
     let mousePosition = { x: 0, y: 0 };
@@ -17,6 +21,10 @@
             });
             const response = await invoke("read_json");
             thoughts = JSON.parse(response);
+            thoughts.forEach((thought) => {
+                if (thought.x === undefined) thought.x = 0;
+                if (thought.y === undefined) thought.y = 0;
+            });
             console.log(
                 `thoughts in mind component from invoke:`,
                 JSON.stringify(thoughts),
@@ -25,6 +33,7 @@
             console.log("Error invoking thoughts", error);
         }
     });
+
     function findThoughtIndexById(activeThought) {
         return thoughts.findIndex((thought) => thought.id === activeThought);
     }
@@ -34,6 +43,9 @@
 
         const activeThought = e.target.dataset.thoughtId;
         activeIndex = findThoughtIndexById(+activeThought);
+
+        thoughts[activeIndex].x = e.target.offsetLeft;
+        thoughts[activeIndex].y = e.target.offsetTop;
 
         mouseOffset = {
             x: e.clientX - e.target.getBoundingClientRect().left,
@@ -85,6 +97,21 @@
             {thought.title}
             #{thought.id}
         </div>
+        {#if thought.relation_id}
+            <svg
+                style="position:absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none;"
+            >
+                <line
+                    x1={thought.x + 50}
+                    y1={thought.y + 50}
+                    x2={thoughts.find((t) => t.id === thought.relation_id).x +
+                        50}
+                    y2={thoughts.find((t) => t.id === thought.relation_id).y +
+                        50}
+                    stroke="white"
+                />
+            </svg>
+        {/if}
     {/each}
 </div>
 
@@ -101,5 +128,6 @@
         width: 100px;
         height: 100px;
         background-color: #ff5733;
+        z-index: 2;
     }
 </style>

@@ -8,6 +8,7 @@ use std::fs;
 struct Thought {
     id: u32,
     title: String,
+    relation_id: u32,
     x: u32,
     y: u32,
 }

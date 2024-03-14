@@ -49,6 +49,7 @@
                 id: thoughtId,
                 x,
                 y,
+                relation_id: 0,
             },
         ]);
 
