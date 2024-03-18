@@ -2,22 +2,57 @@
   {
     "id": 1,
     "title": "yeeyee",
-    "relation_id": 0,
-    "x": 178,
-    "y": 124
+    "relation_id": 3,
+    "x": 193,
+    "y": 176
   },
   {
     "id": 2,
     "title": "yeetus",
     "relation_id": 3,
-    "x": 377,
-    "y": 83
+    "x": 278,
+    "y": 11
   },
   {
     "id": 3,
     "title": "yeet",
-    "relation_id": 2,
-    "x": 35,
-    "y": 54
+    "relation_id": 0,
+    "x": 9,
+    "y": 33
+  },
+  {
+    "id": 4,
+    "title": "Kys",
+    "relation_id": 0,
+    "x": 58,
+    "y": 156
+  },
+  {
+    "id": 5,
+    "title": "New Thought",
+    "relation_id": 1,
+    "x": 328,
+    "y": 221
+  },
+  {
+    "id": 6,
+    "title": "Är",
+    "relation_id": 5,
+    "x": 586,
+    "y": 219
+  },
+  {
+    "id": 7,
+    "title": "kas",
+    "relation_id": 4,
+    "x": 147,
+    "y": 56
+  },
+  {
+    "id": 8,
+    "title": "asd",
+    "relation_id": 1,
+    "x": 336,
+    "y": 424
   }
 ]

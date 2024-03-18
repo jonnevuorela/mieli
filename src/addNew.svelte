@@ -1,6 +1,5 @@
 <script>
     import { invoke } from "@tauri-apps/api/tauri";
-    //const { invoke } = window.__TAURI__.tauri
 
     const passiveMode = "passive";
     const inputMode = "text_area_visible";
@@ -74,6 +73,7 @@
         <button on:click={okButtonClick}> OK </button>
     </div>
 {/if}
+
 <div>
     <button type="submit" on:click={addButtonClick}> Add a tought </button>
 </div>
