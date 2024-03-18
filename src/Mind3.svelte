@@ -2,18 +2,32 @@
     import { onMount } from "svelte";
     import { invoke } from "@tauri-apps/api";
     import AddNew from "./AddNew.svelte";
+    import Mind from "./Mind.svelte";
 
     const passiveMode = "passive";
     const inputMode = "text_area_visible";
     let currentState = passiveMode;
-    let title = "";
+
+    let isPanning = false;
+    let startPanPosition = { x: 0, y: 0 };
+    let panOffset = { x: 0, y: 0 };
+
     let isDragging = false;
     let mouseOffset = { x: 0, y: 0 };
     let mousePosition = { x: 0, y: 0 };
+
     let thoughts = [];
     let selectedThought = null;
     let activeIndex = null;
+    let title = "";
     let lastId;
+
+    let mind;
+    let scale = 1;
+    let mouseX = 0;
+    let mouseY = 0;
+    let translateX = 0;
+    let translateY = 0;
 
     onMount(async () => {
         try {
@@ -39,31 +53,88 @@
         return thoughts.findIndex((thought) => thought.id === activeThought);
     }
 
-    async function handleDragStart(e) {
-        const activeThought = e.target.dataset.thoughtId;
-        activeIndex = findThoughtIndexById(+activeThought);
+    function handleWheel(e) {
+        e.preventDefault();
 
-        if (thoughts[activeIndex] != null) {
-            isDragging = true;
+        mouseX = e.clientX;
+        mouseY = e.clientY;
 
-            thoughts[activeIndex].x = e.target.offsetLeft;
-            thoughts[activeIndex].y = e.target.offsetTop;
+        const newScale = Math.min(
+            Math.max(0.125, scale + e.deltaY * -0.001),
+            4,
+        );
 
-            mouseOffset = {
-                x: e.clientX - e.target.getBoundingClientRect().left,
-                y: e.clientY - e.target.getBoundingClientRect().top,
-            };
-        }
+        const scaleDiff = newScale - scale;
+
+        scale = newScale;
+        scale = Number(scale.toFixed(2));
+
+        mind.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`;
+        console.log("scale:", scale);
     }
     function handleDragEnd() {
         isDragging = false;
     }
 
-    async function handleDragMove(e) {
+    function handleMouseDown(e) {
+        isPanning = true;
+        isDragging = false;
+        console.log("isPaning:", isPanning);
+        startPanPosition = {
+            x: e.clientX,
+            y: e.clientY,
+        };
+    }
+    function panMind(e) {
+        if (isPanning) {
+            panOffset = {
+                x: e.clientX - startPanPosition.x,
+                y: e.clientY - startPanPosition.y,
+            };
+            mind.style.transform = `translate(${panOffset.x}px, ${panOffset.y}px) scale(${scale})`;
+        }
+    }
+    function handleMouseUp() {
+        isPanning = false;
+    }
+
+    function handleMouseMove(e) {
+        mouseX = e.clientX;
+        mouseY = e.clientY;
+
+        const adjustedMousePosition = {
+            x: e.clientX / scale,
+            y: e.clientY / scale,
+        };
+        panMind(e);
+        handleDragMove(adjustedMousePosition);
+    }
+
+    async function handleDragStart(e) {
+        e.stopPropagation();
+
+        const activeThought = e.target.dataset.thoughtId;
+        activeIndex = findThoughtIndexById(+activeThought);
+
+        if (thoughts[activeIndex] != null) {
+            isDragging = true;
+            isPanning = false;
+
+            thoughts[activeIndex].x = e.target.offsetLeft;
+            thoughts[activeIndex].y = e.target.offsetTop;
+
+            mouseOffset = {
+                x: (e.clientX - e.target.getBoundingClientRect().left) / scale,
+                y: (e.clientY - e.target.getBoundingClientRect().top) / scale,
+            };
+        }
+    }
+
+    async function handleDragMove(adjustedMousePosition) {
         if (isDragging) {
             mousePosition = {
-                x: e.clientX,
-                y: e.clientY,
+                x: adjustedMousePosition.x,
+                y: adjustedMousePosition.y,
             };
 
             // track position
@@ -82,6 +153,28 @@
 
             const data = JSON.stringify(thoughts);
             await invoke("write_json", { data });
+        }
+    }
+
+    function handleDoubleClick(e) {
+        const toughtId = e.target.dataset.thoughtId;
+        console.log("toughtId", toughtId);
+        const thought = thoughts.find((thought) => thought.id === +toughtId);
+
+        if (thought) {
+            const centerX = window.innerWidth / 2;
+            const centerY = window.innerHeight / 2;
+
+            const thoughtCenterX = thought.x + 50;
+            const thoughtCenterY = thought.y + 50;
+
+            const translateX = centerX - thought.x * scale;
+            const translateY = centerY - thought.y * scale;
+
+            scale = 2;
+
+            mind.style.transformOrigin = `${thoughtCenterX}px ${thoughtCenterY}px`;
+            mind.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`;
         }
     }
     function handleClick(e) {
@@ -127,7 +220,15 @@
     }
 </script>
 
-<div id="mind" role="main" on:mousemove={handleDragMove}>
+<div
+    id="mind"
+    role="main"
+    bind:this={mind}
+    on:mousedown={handleMouseDown}
+    on:mouseup={handleMouseUp}
+    on:mousemove={handleMouseMove}
+    on:wheel={handleWheel}
+>
     {#each thoughts as thought (thought.id)}
         <div
             role="application"
@@ -136,6 +237,7 @@
             style="left: {thought.x}px; top: {thought.y}px;"
             on:mousedown={handleDragStart}
             on:mouseup={handleDragEnd}
+            on:dblclick={handleDoubleClick}
             data-thought-id={thought.id}
         >
             <button on:click={handleClick}> + </button>
@@ -179,8 +281,13 @@
     #mind {
         position: relative;
         background-color: black;
-        width: 150vh;
-        height: 80vh;
+        width: 769vw;
+        height: 576.75vh;
+        transform-origin: 50% 50%;
+        border: 1px solid white;
+    }
+    #mind:active {
+        cursor: grabbing;
     }
 
     .thought {
