@@ -1,8 +1,6 @@
 <script>
     import { onMount } from "svelte";
     import { invoke } from "@tauri-apps/api";
-    import AddNew from "./AddNew.svelte";
-    import Mind from "./Mind.svelte";
 
     const passiveMode = "passive";
     const inputMode = "text_area_visible";
@@ -78,15 +76,14 @@
 
     function handleMouseDown(e) {
         isPanning = true;
-        isDragging = false;
         console.log("isPaning:", isPanning);
         startPanPosition = {
-            x: e.clientX,
-            y: e.clientY,
+            x: e.clientX - panOffset.x,
+            y: e.clientY - panOffset.y,
         };
     }
     function panMind(e) {
-        if (isPanning) {
+        if (isPanning && scale > 0.13) {
             panOffset = {
                 x: e.clientX - startPanPosition.x,
                 y: e.clientY - startPanPosition.y,
@@ -99,49 +96,71 @@
     }
 
     function handleMouseMove(e) {
-        mouseX = e.clientX;
-        mouseY = e.clientY;
-
         const adjustedMousePosition = {
             x: e.clientX / scale,
             y: e.clientY / scale,
         };
-        panMind(e);
-        handleDragMove(adjustedMousePosition);
+        if (isPanning) {
+            panMind(e);
+        } else if (isDragging) {
+            handleDragMove(adjustedMousePosition);
+        }
     }
 
     async function handleDragStart(e) {
         e.stopPropagation();
+
+        // same value as adjustedMousePosition in handleMouseMove, but this needs to be independent
+        mouseX = e.clientX / scale;
+        mouseY = e.clientY / scale;
 
         const activeThought = e.target.dataset.thoughtId;
         activeIndex = findThoughtIndexById(+activeThought);
 
         if (thoughts[activeIndex] != null) {
             isDragging = true;
-            isPanning = false;
 
             thoughts[activeIndex].x = e.target.offsetLeft;
             thoughts[activeIndex].y = e.target.offsetTop;
 
-            mouseOffset = {
-                x: (e.clientX - e.target.getBoundingClientRect().left) / scale,
-                y: (e.clientY - e.target.getBoundingClientRect().top) / scale,
+            thoughts[activeIndex].initialPosition = {
+                x: thoughts[activeIndex].x,
+                y: thoughts[activeIndex].y,
             };
+
+            mouseOffset = {
+                x: Math.round(mouseX - thoughts[activeIndex].x),
+                y: Math.round(mouseY - thoughts[activeIndex].y),
+            };
+
+            console.log("mouseOffset", mouseOffset);
         }
     }
 
     async function handleDragMove(adjustedMousePosition) {
         if (isDragging) {
             mousePosition = {
-                x: adjustedMousePosition.x,
-                y: adjustedMousePosition.y,
+                x: Number.parseInt(adjustedMousePosition.x),
+                y: Number.parseInt(adjustedMousePosition.y),
             };
+            console.log("mousePosition", mousePosition);
 
             // track position
             thoughts[activeIndex].el.style.left =
                 `${mousePosition.x - mouseOffset.x}px`;
             thoughts[activeIndex].el.style.top =
                 `${mousePosition.y - mouseOffset.y}px`;
+
+            console.log(
+                "mousePosition",
+                mousePosition,
+                "-",
+                "mouseOffset",
+                mouseOffset,
+                "=",
+                "thoughts[activeIndex].el.style",
+                thoughts[activeIndex].el.style,
+            );
 
             // update thoughts array
             thoughts[activeIndex].x = parseInt(
@@ -152,7 +171,7 @@
             );
 
             const data = JSON.stringify(thoughts);
-            await invoke("write_json", { data });
+            //await invoke("write_json", { data });
         }
     }
 
@@ -279,10 +298,10 @@
         z-index: 3;
     }
     #mind {
-        position: relative;
+        position: fixed;
         background-color: black;
         width: 769vw;
-        height: 576.75vh;
+        min-height: 769vh;
         transform-origin: 50% 50%;
         border: 1px solid white;
     }

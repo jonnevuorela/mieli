@@ -74,14 +74,22 @@
     </div>
 {/if}
 
-<div>
-    <button type="submit" on:click={addButtonClick}> Add a tought </button>
-</div>
-<div>
-    {#if lastId > 0}
-        <p>LastId: {lastId}</p>
-    {/if}
-    <button type="submit" id="debug" on:click={fetchLastId}>
-        Fetch last id
+<div class="footer">
+    <button class="footer" type="submit" on:click={addButtonClick}>
+        Add a tought
     </button>
 </div>
+
+<style>
+    #inputWindow {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+    }
+    .footer {
+        position: fixed;
+        bottom: 0;
+        width: 100%;
+    }
+</style>
