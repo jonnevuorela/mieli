@@ -18,7 +18,6 @@
     let selectedThought = null;
     let activeIndex = null;
     let title = "";
-    let lastId;
 
     let mind;
     let scale = 1;
@@ -53,7 +52,6 @@
 
     function handleWheel(e) {
         e.preventDefault();
-
         mouseX = e.clientX;
         mouseY = e.clientY;
 
@@ -61,8 +59,6 @@
             Math.max(0.125, scale + e.deltaY * -0.001),
             4,
         );
-
-        const scaleDiff = newScale - scale;
 
         scale = newScale;
         scale = Number(scale.toFixed(2));
@@ -73,26 +69,17 @@
     function handleDragEnd() {
         isDragging = false;
     }
-
     function handleMouseDown(e) {
-        isPanning = true;
-        console.log("isPaning:", isPanning);
-        startPanPosition = {
-            x: e.clientX - panOffset.x,
-            y: e.clientY - panOffset.y,
-        };
-    }
-    function panMind(e) {
-        if (isPanning && scale > 0.13) {
-            panOffset = {
-                x: e.clientX - startPanPosition.x,
-                y: e.clientY - startPanPosition.y,
+        e.preventDefault();
+        if (e.target.classList.contains("thought")) {
+            handleDragStart(e);
+        } else {
+            isPanning = true;
+            startPanPosition = {
+                x: e.clientX,
+                y: e.clientY,
             };
-            mind.style.transform = `translate(${panOffset.x}px, ${panOffset.y}px) scale(${scale})`;
         }
-    }
-    function handleMouseUp() {
-        isPanning = false;
     }
 
     function handleMouseMove(e) {
@@ -100,12 +87,68 @@
             x: e.clientX / scale,
             y: e.clientY / scale,
         };
+
         if (isPanning) {
-            panMind(e);
+            const dx = e.clientX - startPanPosition.x;
+            const dy = e.clientY - startPanPosition.y;
+            startPanPosition = { x: e.clientX, y: e.clientY };
+            panMind(dx, dy);
         } else if (isDragging) {
             handleDragMove(adjustedMousePosition);
         }
     }
+
+    function handleMouseUp() {
+        isPanning = false;
+    }
+
+    function panMind(dx, dy) {
+        const buffer = 50;
+        const mind = document.getElementById("mind");
+        const style = window.getComputedStyle(mind);
+        const matrix = new DOMMatrixReadOnly(style.transform);
+        let translateX = matrix.m41 + dx;
+        let translateY = matrix.m42 + dy;
+        const scaleX = matrix.a;
+        const scaleY = matrix.d;
+
+        const mindRect = mind.getBoundingClientRect();
+        const viewportWidth = window.innerWidth;
+        const viewportHeight = window.innerHeight;
+
+        if (mindRect.left + dx > 0 || mindRect.right + dx < viewportWidth) {
+            translateX = translateX - dx;
+            if (
+                mindRect.left + dx > buffer ||
+                mindRect.right + dx < viewportWidth - buffer
+            ) {
+                handleMouseUp();
+            }
+        }
+        if (mindRect.top + dy > 0 || mindRect.bottom + dy < viewportHeight) {
+            translateY = translateY - dy;
+            if (
+                mindRect.top + dy > buffer ||
+                mindRect.bottom + dy < viewportHeight - buffer
+            ) {
+                handleMouseUp();
+            }
+        }
+
+        mind.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scaleX}, ${scaleY})`;
+    }
+
+    // listeners for mouse going out of window
+    window.addEventListener("mouseout", (event) => {
+        if (!event.relatedTarget && !event.toElement) {
+            handleMouseUp();
+        }
+    });
+    window.addEventListener("mousemove", (event) => {
+        if (!(event.buttons & 1)) {
+            handleMouseUp();
+        }
+    });
 
     async function handleDragStart(e) {
         e.stopPropagation();
@@ -171,7 +214,7 @@
             );
 
             const data = JSON.stringify(thoughts);
-            //await invoke("write_json", { data });
+            await invoke("write_json", { data });
         }
     }
 
@@ -298,7 +341,7 @@
         z-index: 3;
     }
     #mind {
-        position: fixed;
+        position: absolute;
         background-color: black;
         width: 769vw;
         min-height: 769vh;

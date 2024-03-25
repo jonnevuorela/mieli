@@ -6,8 +6,9 @@
     let currentState = passiveMode;
 
     let title = "";
-    let x = 0;
-    let y = 0;
+    let x = 4800;
+    let y = 2350;
+
     let jsonOutput;
 
     let lastId;
