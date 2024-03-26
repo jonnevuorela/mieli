@@ -14,6 +14,8 @@
     let mouseOffset = { x: 0, y: 0 };
     let mousePosition = { x: 0, y: 0 };
 
+    let isAnimating = false;
+
     let thoughts = [];
     let selectedThought = null;
     let activeIndex = null;
@@ -23,8 +25,13 @@
     let scale = 1;
     let mouseX = 0;
     let mouseY = 0;
-    let translateX = 0;
-    let translateY = 0;
+
+    let targetTranslate = { x: 0, y: 0 };
+    let currentTranslate = { x: 0, y: 0 };
+    let isMovingToTarget = false;
+
+    const panSpeed = 0.8;
+    const zoomSpeed = 0.08;
 
     onMount(async () => {
         try {
@@ -50,25 +57,92 @@
         return thoughts.findIndex((thought) => thought.id === activeThought);
     }
 
+    function checkBorders() {
+        const mindRect = mind.getBoundingClientRect();
+        const viewportWidth = window.innerWidth;
+        const viewportHeight = window.innerHeight;
+
+        if (mindRect.left > 0) {
+            targetTranslate.x -= mindRect.left;
+        }
+        if (mindRect.right < viewportWidth) {
+            targetTranslate.x += viewportWidth - mindRect.right;
+        }
+        if (mindRect.top > 0) {
+            targetTranslate.y -= mindRect.top;
+        }
+        if (mindRect.bottom < viewportHeight) {
+            targetTranslate.y += viewportHeight - mindRect.bottom;
+        }
+    }
+
     function handleWheel(e) {
         e.preventDefault();
-        mouseX = e.clientX;
-        mouseY = e.clientY;
 
-        const newScale = Math.min(
-            Math.max(0.125, scale + e.deltaY * -0.001),
-            4,
-        );
+        const mind = document.getElementById("mind");
+        const style = window.getComputedStyle(mind);
+        const matrix = new DOMMatrixReadOnly(style.transform);
+        const currentTranslate = {
+            x: matrix.m41,
+            y: matrix.m42,
+        };
 
-        scale = newScale;
-        scale = Number(scale.toFixed(2));
+        const oldScale = scale;
+        scale *= 1 - e.deltaY * zoomSpeed;
+        scale = Math.min(Math.max(scale, 0.125), 4);
 
-        mind.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`;
-        console.log("scale:", scale);
+        if (e.deltaY > 0) {
+            targetTranslate.x = (currentTranslate.x * scale) / oldScale;
+            targetTranslate.y = (currentTranslate.y * scale) / oldScale;
+        } else {
+            // Scrolling in
+            // Zoom in towards the cursor
+            const viewportCenter = {
+                x: window.innerWidth / 2,
+                y: window.innerHeight / 2,
+            };
+            const mousePointTo = {
+                x: e.clientX - viewportCenter.x - currentTranslate.x,
+                y: e.clientY - viewportCenter.y - currentTranslate.y,
+            };
+            const scaleRatio = oldScale / scale;
+            targetTranslate.x =
+                currentTranslate.x - mousePointTo.x * (1 - scaleRatio);
+            targetTranslate.y =
+                currentTranslate.y - mousePointTo.y * (1 - scaleRatio);
+        }
+
+        checkBorders();
+
+        if (!isMovingToTarget) {
+            isMovingToTarget = true;
+            isAnimating = true;
+            moveToTarget(zoomSpeed);
+        }
     }
     function handleDragEnd() {
         isDragging = false;
     }
+
+    function moveToTarget(speed) {
+        const dx = targetTranslate.x - currentTranslate.x;
+        const dy = targetTranslate.y - currentTranslate.y;
+
+        currentTranslate.x += dx * speed;
+        currentTranslate.y += dy * speed;
+
+        mind.style.transform = `translate(${currentTranslate.x}px, ${currentTranslate.y}px) scale(${scale})`;
+
+        if (Math.abs(dx) < 0.1 && Math.abs(dy) < 0.1) {
+            isAnimating = false;
+            isMovingToTarget = false;
+            console.log("isAnimating", isAnimating);
+        } else {
+            // Continue the animation.
+            window.requestAnimationFrame(() => moveToTarget(speed));
+        }
+    }
+
     function handleMouseDown(e) {
         e.preventDefault();
         if (e.target.classList.contains("thought")) {
@@ -103,39 +177,19 @@
     }
 
     function panMind(dx, dy) {
-        const buffer = 50;
         const mind = document.getElementById("mind");
         const style = window.getComputedStyle(mind);
         const matrix = new DOMMatrixReadOnly(style.transform);
-        let translateX = matrix.m41 + dx;
-        let translateY = matrix.m42 + dy;
-        const scaleX = matrix.a;
-        const scaleY = matrix.d;
 
-        const mindRect = mind.getBoundingClientRect();
-        const viewportWidth = window.innerWidth;
-        const viewportHeight = window.innerHeight;
+        targetTranslate.x = matrix.m41 + dx;
+        targetTranslate.y = matrix.m42 + dy;
 
-        if (mindRect.left + dx > 0 || mindRect.right + dx < viewportWidth) {
-            translateX = translateX - dx;
-            if (
-                mindRect.left + dx > buffer ||
-                mindRect.right + dx < viewportWidth - buffer
-            ) {
-                handleMouseUp();
-            }
+        checkBorders();
+
+        if (!isMovingToTarget) {
+            isMovingToTarget = true;
+            moveToTarget(panSpeed);
         }
-        if (mindRect.top + dy > 0 || mindRect.bottom + dy < viewportHeight) {
-            translateY = translateY - dy;
-            if (
-                mindRect.top + dy > buffer ||
-                mindRect.bottom + dy < viewportHeight - buffer
-            ) {
-                handleMouseUp();
-            }
-        }
-
-        mind.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scaleX}, ${scaleY})`;
     }
 
     // listeners for mouse going out of window
@@ -149,6 +203,13 @@
             handleMouseUp();
         }
     });
+    window.addEventListener(
+        "wheel",
+        function (e) {
+            e.preventDefault();
+        },
+        { passive: false },
+    );
 
     async function handleDragStart(e) {
         e.stopPropagation();
