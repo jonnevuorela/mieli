@@ -1,9 +1,11 @@
 <script>
     import AddNew from "./AddNew.svelte";
     import Mind3 from "./Mind3.svelte";
+    import Header from "./Header.svelte";
 </script>
 
 <main id="main" class="container">
+    <Header />
     <Mind3 />
     <AddNew />
 </main>

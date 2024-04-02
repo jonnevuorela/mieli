@@ -83,6 +83,9 @@
 
 <style>
     #inputWindow {
+        height: 100px;
+        width: 200px;
+        background-color: white;
         position: absolute;
         top: 50%;
         left: 50%;

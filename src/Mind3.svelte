@@ -310,6 +310,11 @@
         );
     }
 
+    function handleClickCancel() {
+        console.log("cancelButtonClick");
+        currentState = passiveMode;
+    }
+
     async function handleClickOk(e) {
         console.log("okButtonClick");
         currentState = passiveMode;
@@ -361,14 +366,23 @@
             on:mousedown={handleDragStart}
             on:mouseup={handleDragEnd}
             on:dblclick={handleDoubleClick}
+            class:blurred={currentState === inputMode}
             data-thought-id={thought.id}
         >
-            <button on:click={handleClick}> + </button>
-            {thought.title}
-            #{thought.id}
+            <button id="addButton" on:click={handleClick}>
+                <svg width="8" height="8">
+                    <line x1="0" y1="4" x2="8" y2="4" stroke="white" />
+                    <line x1="4" y1="0" x2="4" y2="8" stroke="white" />
+                </svg>
+            </button>
+            <div id="thoughtTitle">
+                {thought.title}
+                #{thought.id}
+            </div>
         </div>
         {#if thought.relation_id}
             <svg
+                class:blurred={currentState === inputMode}
                 style="position:absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none;"
             >
                 <line
@@ -383,24 +397,73 @@
             </svg>
         {/if}
     {/each}
-    {#if currentState === inputMode}
-        <div id="inputWindow">
-            <input type="text" bind:value={title} />
-            <button on:click={handleClickOk}> OK </button>
-        </div>
-    {/if}
 </div>
 
+{#if currentState === inputMode}
+    <div id="inputWindow">
+        <button id="inputCancel" on:click={handleClickCancel}>
+            <svg width="8" height="8" fill="currentColor">
+                // cross for cancelling
+                <path d="M0 0 L8 8 M8 0 L0 8" stroke="white" stroke-width="2" />
+            </svg>
+        </button>
+        <input id="textInput" type="text" bind:value={title} />
+        <button id="inputOk" on:click={handleClickOk}> OK </button>
+    </div>
+{/if}
+
 <style>
+    .blurred {
+        filter: blur(5px);
+    }
     #inputWindow {
-        position: absolute;
+        position: fixed;
         top: 50%;
         left: 50%;
         transform: translate(-50%, -50%);
-        background-color: #ff5733;
+        background-color: midnightblue;
+        border: 0.1em groove black;
+        border-radius: 0.5em;
+        height: 6em;
         padding: 10px;
         z-index: 3;
     }
+    #textInput {
+        background-color: transparent;
+        border: none;
+
+        color: white;
+        font-size: 1em;
+        bottom: 0;
+        left: 0;
+        margin: 0 10px;
+        width: 100%;
+    }
+    #inputOk {
+        background-color: transparent;
+        border: 1px solid white;
+        color: white;
+        font-size: 1em;
+        bottom: 0;
+        right: 0;
+        margin: 10px;
+        padding: 5px;
+        width: fit-content;
+        height: fit-content;
+    }
+    #inputCancel {
+        background-color: transparent;
+        border: 1px solid white;
+        color: white;
+        top: 0;
+        left: 0;
+        font-size: 1em;
+        margin: 10px;
+        padding: 5px;
+        width: fit-content;
+        height: fit-content;
+    }
+
     #mind {
         position: absolute;
         background-color: black;
@@ -415,9 +478,33 @@
 
     .thought {
         position: absolute;
-        width: 100px;
-        height: 100px;
-        background-color: #ff5733;
+        display: flex;
+        flex-direction: column;
+        font: 1.5em sans-serif;
+        width: 4em;
+        height: 4em;
+        background-color: maroon;
         z-index: 2;
+    }
+    #thoughtTitle {
+        display: flex;
+        flex-direction: column;
+        background-color: transparent;
+        color: white;
+        font-size: 1em;
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        text-align: center;
+    }
+    #addButton {
+        background-color: transparent;
+        border: none;
+        color: white;
+        font-size: 1em;
+        margin: 0;
+        padding: 0;
+        width: 1em;
+        height: 1em;
     }
 </style>
