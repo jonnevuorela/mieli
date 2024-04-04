@@ -1,8 +1,15 @@
 <script>
+    import { createEventDispatcher } from "svelte";
+    const dispatch = createEventDispatcher();
+
+    function toggleMenu() {
+        dispatch("toggleMenu");
+        console.log("toggleMenu dispatched");
+    }
 </script>
 
 <div id="header">
-    <button id="menu">
+    <button on:click={toggleMenu} id="menuButton">
         <svg
             xmlns="http://www.w3.org/2000/svg"
             width="16"
@@ -14,7 +21,7 @@
             />
         </svg>
     </button>
-    <button id="settings">
+    <button id="settingsButton">
         <svg
             xmlns="http://www.w3.org/2000/svg"
             width="16"
@@ -48,7 +55,7 @@
         clear: both;
     }
 
-    #menu {
+    #menuButton {
         position: absolute;
         left: 0;
         background-color: midnightblue;
@@ -63,7 +70,7 @@
         cursor: pointer;
     }
 
-    #settings {
+    #settingsButton {
         position: absolute;
         right: 0;
         background-color: midnightblue;

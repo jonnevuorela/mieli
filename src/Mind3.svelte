@@ -377,7 +377,6 @@
             </button>
             <div id="thoughtTitle">
                 {thought.title}
-                #{thought.id}
             </div>
         </div>
         {#if thought.relation_id}

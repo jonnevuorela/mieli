@@ -67,33 +67,10 @@
         console.log(parsedJson);
     }
 </script>
-
-{#if currentState === inputMode}
-    <div id="inputWindow">
-        <input type="text" bind:value={title} />
-        <button on:click={okButtonClick}> OK </button>
-    </div>
-{/if}
-
-<div class="footer">
-    <button class="footer" type="submit" on:click={addButtonClick}>
-        Add a tought
-    </button>
-</div>
-
-<style>
-    #inputWindow {
-        height: 100px;
-        width: 200px;
-        background-color: white;
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-    }
-    .footer {
-        position: fixed;
-        bottom: 0;
-        width: 100%;
-    }
-</style>
+<AddNew
+    bind:title
+    bind:x
+    bind:y
+    bind:currentState
+    on:ok={okButtonClick}
+    on:cancel={() => (currentState = passiveMode)}
