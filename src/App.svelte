@@ -1,6 +1,5 @@
 <script>
     import Menu from "./Menu.svelte";
-    import Input from "./Input.svelte";
     import AddNew from "./AddNew.svelte";
     import Mind3 from "./Mind3.svelte";
     import Header from "./Header.svelte";
@@ -12,11 +11,6 @@
 
     let showMenu = false;
     let inputWindow = false;
-
-    function passInput(e) {
-        console.log("passInput", e.detail.title);
-        dispatch("input", { title: e.detail.title });
-    }
 </script>
 
 <main id="main" class="container">
@@ -27,15 +21,20 @@
     {/if}
 
     {#if inputWindow}
-        <Input
-            on:cancel={() => (inputWindow = !inputWindow)}
-            on:ok={passInput}
-        />
+        <AddNew on:cancel={() => (inputWindow = !inputWindow)} />
     {/if}
 
-    <Mind3 />
+    <Mind3
+        on:add={(e) => {
+            dispatch("addRelated", {
+                relatedId: e.detail.relatedId,
+                coordinates: e.detail.coordinates,
+            });
+            inputWindow = !inputWindow;
+        }}
+    />
 
-    <Footer on:addButtonClick={() => (inputWindow = !inputWindow)} />
+    <Footer on:input={() => (inputWindow = !inputWindow)} />
 </main>
 
 <style>

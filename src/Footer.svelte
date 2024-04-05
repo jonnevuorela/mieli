@@ -3,14 +3,14 @@
 
     const dispatch = createEventDispatcher();
 
-    function addButtonClick() {
-        console.log("addButtonClick");
-        dispatch("addButtonClick");
+    function input() {
+        console.log("input");
+        dispatch("input");
     }
 </script>
 
 <div class="footer">
-    <button class="add" type="submit" on:click={addButtonClick}>
+    <button class="add" type="submit" on:click={input}>
         <svg width="16" height="16">
             <line x1="0" y1="8" x2="16" y2="8" stroke="white" />
             <line x1="8" y1="2" x2="8" y2="16" stroke="white" />

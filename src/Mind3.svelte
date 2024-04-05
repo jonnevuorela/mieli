@@ -1,6 +1,9 @@
 <script>
     import { onMount } from "svelte";
     import { invoke } from "@tauri-apps/api";
+    import { createEventDispatcher } from "svelte";
+
+    const dispatch = createEventDispatcher();
 
     const passiveMode = "passive";
     const inputMode = "text_area_visible";
@@ -219,6 +222,7 @@
         mouseY = e.clientY / scale;
 
         const activeThought = e.target.dataset.thoughtId;
+
         activeIndex = findThoughtIndexById(+activeThought);
 
         if (thoughts[activeIndex] != null) {
@@ -236,8 +240,6 @@
                 x: Math.round(mouseX - thoughts[activeIndex].x),
                 y: Math.round(mouseY - thoughts[activeIndex].y),
             };
-
-            console.log("mouseOffset", mouseOffset);
         }
     }
 
@@ -247,24 +249,12 @@
                 x: Number.parseInt(adjustedMousePosition.x),
                 y: Number.parseInt(adjustedMousePosition.y),
             };
-            console.log("mousePosition", mousePosition);
 
             // track position
             thoughts[activeIndex].el.style.left =
                 `${mousePosition.x - mouseOffset.x}px`;
             thoughts[activeIndex].el.style.top =
                 `${mousePosition.y - mouseOffset.y}px`;
-
-            console.log(
-                "mousePosition",
-                mousePosition,
-                "-",
-                "mouseOffset",
-                mouseOffset,
-                "=",
-                "thoughts[activeIndex].el.style",
-                thoughts[activeIndex].el.style,
-            );
 
             // update thoughts array
             thoughts[activeIndex].x = parseInt(
@@ -281,7 +271,6 @@
 
     function handleDoubleClick(e) {
         const toughtId = e.target.dataset.thoughtId;
-        console.log("toughtId", toughtId);
         const thought = thoughts.find((thought) => thought.id === +toughtId);
 
         if (thought) {
@@ -300,22 +289,19 @@
             mind.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`;
         }
     }
-    function handleClick(e) {
-        console.log("addButtonClick");
-        currentState = inputMode;
+    function handleClick(thoughtId) {
+        let relatedId = thoughtId;
+        let thought = thoughts.find((t) => t.id === thoughtId);
+        let coordinates = { x: thought.x, y: thought.y };
 
-        selectedThought = thoughts.find(
-            (thought) =>
-                thought.id === +e.target.parentElement.dataset.thoughtId,
-        );
+        console.log("relatedId (from Mind)", relatedId);
+        console.log("thoughts coordinates (from Mind)", thought.x, thought.y);
+        console.log("------------------------");
+
+        dispatch("add", { relatedId, coordinates });
     }
 
-    function handleClickCancel() {
-        console.log("cancelButtonClick");
-        currentState = passiveMode;
-    }
-
-    async function handleClickOk(e) {
+    /*async function handleClickOk(e) {
         console.log("okButtonClick");
         currentState = passiveMode;
 
@@ -345,7 +331,7 @@
             .catch((error) => {
                 console.error("Error writing data", error);
             });
-    }
+            }*/
 </script>
 
 <div
@@ -369,7 +355,7 @@
             class:blurred={currentState === inputMode}
             data-thought-id={thought.id}
         >
-            <button id="addButton" on:click={handleClick}>
+            <button id="addRelated" on:click={handleClick(thought.id)}>
                 <svg width="8" height="8">
                     <line x1="0" y1="4" x2="8" y2="4" stroke="white" />
                     <line x1="4" y1="0" x2="4" y2="8" stroke="white" />
@@ -397,19 +383,6 @@
         {/if}
     {/each}
 </div>
-
-{#if currentState === inputMode}
-    <div id="inputWindow">
-        <button id="inputCancel" on:click={handleClickCancel}>
-            <svg width="8" height="8" fill="currentColor">
-                // cross for cancelling
-                <path d="M0 0 L8 8 M8 0 L0 8" stroke="white" stroke-width="2" />
-            </svg>
-        </button>
-        <input id="textInput" type="text" bind:value={title} />
-        <button id="inputOk" on:click={handleClickOk}> OK </button>
-    </div>
-{/if}
 
 <style>
     .blurred {
@@ -496,7 +469,7 @@
         width: 100%;
         text-align: center;
     }
-    #addButton {
+    #addRelated {
         background-color: transparent;
         border: none;
         color: white;
