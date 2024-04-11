@@ -3,8 +3,11 @@
     --input-color-dark: #444444;
     --text-color-dark: #aaaaaa;
 }
+::-webkit-scrollbar {
+    width: 0px;
+    height: 0px;
+}
 
-html,
 body {
     background-color: var(--bg-color-dark);
     color: var(--text-color-dark);

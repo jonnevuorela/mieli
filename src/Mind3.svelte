@@ -19,6 +19,12 @@
 
     let isAnimating = false;
 
+    let isConnecting = false;
+    let idConnecting = null;
+    let connectingThought = null;
+    let trackX = 0;
+    let trackY = 0;
+
     let thoughts = [];
     let selectedThought = null;
     let activeIndex = null;
@@ -123,9 +129,6 @@
             moveToTarget(zoomSpeed);
         }
     }
-    function handleDragEnd() {
-        isDragging = false;
-    }
 
     function moveToTarget(speed) {
         const dx = targetTranslate.x - currentTranslate.x;
@@ -164,6 +167,9 @@
             x: e.clientX / scale,
             y: e.clientY / scale,
         };
+        const svgRect = mind.getBoundingClientRect();
+        trackX = (e.clientX - svgRect.left) / scale;
+        trackY = (e.clientY - svgRect.top) / scale;
 
         if (isPanning) {
             const dx = e.clientX - startPanPosition.x;
@@ -269,6 +275,10 @@
         }
     }
 
+    function handleDragEnd() {
+        isDragging = false;
+    }
+
     function handleDoubleClick(e) {
         const toughtId = e.target.dataset.thoughtId;
         const thought = thoughts.find((thought) => thought.id === +toughtId);
@@ -332,6 +342,18 @@
                 console.error("Error writing data", error);
             });
             }*/
+
+    function connectStart(thoughtId) {
+        isConnecting = true;
+        connectingThought = thoughts.find((t) => t.id === thoughtId);
+        window.addEventListener("drag", handleMouseMove);
+    }
+
+    function connectEnd() {
+        isConnecting = false;
+        connectingThought = null;
+        window.removeEventListener("drag", handleMouseMove);
+    }
 </script>
 
 <div
@@ -352,6 +374,7 @@
             on:mousedown={handleDragStart}
             on:mouseup={handleDragEnd}
             on:dblclick={handleDoubleClick}
+            on:drop={handleDrop(thought.id)}
             class:blurred={currentState === inputMode}
             data-thought-id={thought.id}
         >
@@ -361,10 +384,31 @@
                     <line x1="4" y1="0" x2="4" y2="8" stroke="white" />
                 </svg>
             </button>
+            <button
+                id="connect"
+                draggable="true"
+                on:dragstart={() => connectStart(thought.id)}
+                on:dragend={connectEnd}
+            />
+
             <div id="thoughtTitle">
                 {thought.title}
             </div>
         </div>
+        {#if isConnecting && connectingThought}
+            <svg
+                class:blurred={currentState === inputMode}
+                style="position:absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none;"
+            >
+                <line
+                    x1={connectingThought.x}
+                    y1={connectingThought.y}
+                    x2={trackX}
+                    y2={trackY}
+                    stroke="white"
+                />
+            </svg>
+        {/if}
         {#if thought.relation_id}
             <svg
                 class:blurred={currentState === inputMode}
@@ -450,8 +494,7 @@
 
     .thought {
         position: absolute;
-        display: flex;
-        flex-direction: column;
+
         font: 1.5em sans-serif;
         width: 4em;
         height: 4em;
@@ -474,8 +517,18 @@
         border: none;
         color: white;
         font-size: 1em;
-        margin: 0;
-        padding: 0;
+        left: 0;
+        top: 0;
+
+        width: 1em;
+        height: 1em;
+    }
+    #connect {
+        border: solid 1px black;
+        color: white;
+        font-size: 1em;
+        right: 0;
+        top: 0;
         width: 1em;
         height: 1em;
     }
