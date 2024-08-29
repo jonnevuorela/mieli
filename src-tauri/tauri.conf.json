@@ -8,7 +8,7 @@
   },
   "package": {
     "productName": "Mieli",
-    "version": "0.0.0"
+    "version": "0.1.0"
   },
   "tauri": {
     "allowlist": {
@@ -21,8 +21,8 @@
     "windows": [
       {
         "title": "Mieli",
-        "width": 800,
-        "height": 550
+        "width": 1200,
+        "height": 1200
       }
     ],
     "security": {

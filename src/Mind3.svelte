@@ -39,8 +39,8 @@
     let currentTranslate = { x: 0, y: 0 };
     let isMovingToTarget = false;
 
-    const panSpeed = 0.8;
-    const zoomSpeed = 0.08;
+    const panSpeed = 1;
+    const zoomSpeed = 0.001;
 
     onMount(async () => {
         try {
@@ -111,14 +111,16 @@
                 y: window.innerHeight / 2,
             };
             const mousePointTo = {
-                x: e.clientX - viewportCenter.x - currentTranslate.x,
-                y: e.clientY - viewportCenter.y - currentTranslate.y,
+                x: e.clientX,
+                y: e.clientY,
+            };
+            const newCenter = {
+                x: mousePointTo.x * scale + viewportCenter.x,
+                y: mousePointTo.y * scale + viewportCenter.y,
             };
             const scaleRatio = oldScale / scale;
-            targetTranslate.x =
-                currentTranslate.x - mousePointTo.x * (1 - scaleRatio);
-            targetTranslate.y =
-                currentTranslate.y - mousePointTo.y * (1 - scaleRatio);
+            targetTranslate.x = newCenter.x - mousePointTo.x * scaleRatio;
+            targetTranslate.y = newCenter.y - mousePointTo.y * scaleRatio;
         }
 
         checkBorders();
@@ -134,8 +136,8 @@
         const dx = targetTranslate.x - currentTranslate.x;
         const dy = targetTranslate.y - currentTranslate.y;
 
-        currentTranslate.x += dx * speed;
-        currentTranslate.y += dy * speed;
+        currentTranslate.x = dx * speed;
+        currentTranslate.y = dy * speed;
 
         mind.style.transform = `translate(${currentTranslate.x}px, ${currentTranslate.y}px) scale(${scale})`;
 
@@ -145,7 +147,7 @@
             console.log("isAnimating", isAnimating);
         } else {
             // Continue the animation.
-            window.requestAnimationFrame(() => moveToTarget(speed));
+            window.requestAnimationFrame(() => moveToTarget(panSpeed));
         }
     }
 
@@ -172,6 +174,7 @@
         trackY = (e.clientY - svgRect.top) / scale;
 
         if (isPanning) {
+            console.log("Panning");
             const dx = e.clientX - startPanPosition.x;
             const dy = e.clientY - startPanPosition.y;
             startPanPosition = { x: e.clientX, y: e.clientY };
@@ -188,22 +191,20 @@
     function panMind(dx, dy) {
         const mind = document.getElementById("mind");
         const style = window.getComputedStyle(mind);
-        const matrix = new DOMMatrixReadOnly(style.transform);
+        const matrix = new DOMMatrix(style.transform);
 
         targetTranslate.x = matrix.m41 + dx;
         targetTranslate.y = matrix.m42 + dy;
 
         checkBorders();
 
-        if (!isMovingToTarget) {
-            isMovingToTarget = true;
-            moveToTarget(panSpeed);
-        }
+        //mind.style.transform = `translate(${targetTranslate.x}px, ${targetTranslate.y}px) scale(${scale})`;
+        mind.style.transform = `matrix(${matrix.a}, ${matrix.b}, ${matrix.c}, ${matrix.d}, ${targetTranslate.x}, ${targetTranslate.y})`;
     }
 
     // listeners for mouse going out of window
     window.addEventListener("mouseout", (event) => {
-        if (!event.relatedTarget && !event.toElement) {
+        if (event.relatedTarget === null) {
             handleMouseUp();
         }
     });

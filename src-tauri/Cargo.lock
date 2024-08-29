@@ -2117,8 +2117,8 @@ dependencies = [
 ]
 
 [[package]]
-name = "mieli2"
-version = "0.0.0"
+name = "mieli"
+version = "0.1.0"
 dependencies = [
  "serde",
  "serde_json",
