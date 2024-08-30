@@ -61,13 +61,13 @@
         ]);
 
         //Pass new data to backend
-        /*await invoke("write_json", { data: jsonOutput })
+        await invoke("write_json", { data: jsonOutput })
             .then(() => {
                 console.log("Data passed to backend");
             })
             .catch((error) => {
                 console.error("Error writing data", error);
-                });*/
+            });
 
         let parsedJson = JSON.parse(jsonOutput);
     }

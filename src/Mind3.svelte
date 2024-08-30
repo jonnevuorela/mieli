@@ -17,6 +17,8 @@
     let mouseOffset = { x: 0, y: 0 };
     let mousePosition = { x: 0, y: 0 };
 
+    let isZooming = false;
+
     let isAnimating = false;
 
     let isConnecting = false;
@@ -31,7 +33,7 @@
     let title = "";
 
     let mind;
-    let scale = 1;
+    let scale = 0.5;
     let mouseX = 0;
     let mouseY = 0;
 
@@ -40,7 +42,7 @@
     let isMovingToTarget = false;
 
     const panSpeed = 1;
-    const zoomSpeed = 0.001;
+    const zoomSpeed = 0.0005;
 
     onMount(async () => {
         try {
@@ -60,6 +62,7 @@
         } catch (error) {
             console.log("Error invoking thoughts", error);
         }
+        mind.style.transform = `scale(${scale})`;
     });
 
     function findThoughtIndexById(activeThought) {
@@ -84,55 +87,12 @@
             targetTranslate.y += viewportHeight - mindRect.bottom;
         }
     }
-
     function handleWheel(e) {
         e.preventDefault();
 
-        const mind = document.getElementById("mind");
-        const style = window.getComputedStyle(mind);
-        const matrix = new DOMMatrixReadOnly(style.transform);
-        const currentTranslate = {
-            x: matrix.m41,
-            y: matrix.m42,
-        };
-
-        const oldScale = scale;
-        scale *= 1 - e.deltaY * zoomSpeed;
-        scale = Math.min(Math.max(scale, 0.125), 4);
-
-        if (e.deltaY > 0) {
-            targetTranslate.x = (currentTranslate.x * scale) / oldScale;
-            targetTranslate.y = (currentTranslate.y * scale) / oldScale;
-        } else {
-            // Scrolling in
-            // Zoom in towards the cursor
-            const viewportCenter = {
-                x: window.innerWidth / 2,
-                y: window.innerHeight / 2,
-            };
-            const mousePointTo = {
-                x: e.clientX,
-                y: e.clientY,
-            };
-            const newCenter = {
-                x: mousePointTo.x * scale + viewportCenter.x,
-                y: mousePointTo.y * scale + viewportCenter.y,
-            };
-            const scaleRatio = oldScale / scale;
-            targetTranslate.x = newCenter.x - mousePointTo.x * scaleRatio;
-            targetTranslate.y = newCenter.y - mousePointTo.y * scaleRatio;
-        }
-
-        checkBorders();
-
-        if (!isMovingToTarget) {
-            isMovingToTarget = true;
-            isAnimating = true;
-            moveToTarget(zoomSpeed);
-        }
+        checkBorders(); // Ensure the content stays within bounds
     }
-
-    function moveToTarget(speed) {
+    function moveToTarget(speed, scale) {
         const dx = targetTranslate.x - currentTranslate.x;
         const dy = targetTranslate.y - currentTranslate.y;
 
@@ -165,10 +125,12 @@
     }
 
     function handleMouseMove(e) {
+        //for dragging
         const adjustedMousePosition = {
             x: e.clientX / scale,
             y: e.clientY / scale,
         };
+
         const svgRect = mind.getBoundingClientRect();
         trackX = (e.clientX - svgRect.left) / scale;
         trackY = (e.clientY - svgRect.top) / scale;
@@ -312,7 +274,7 @@
         dispatch("add", { relatedId, coordinates });
     }
 
-    /*async function handleClickOk(e) {
+    async function handleClickOk(e) {
         console.log("okButtonClick");
         currentState = passiveMode;
 
@@ -342,7 +304,7 @@
             .catch((error) => {
                 console.error("Error writing data", error);
             });
-            }*/
+    }
 
     function connectStart(thoughtId) {
         isConnecting = true;
