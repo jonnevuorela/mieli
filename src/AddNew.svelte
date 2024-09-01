@@ -2,10 +2,10 @@
     import { invoke } from "@tauri-apps/api/tauri";
     import App from "./App.svelte";
     import Input from "./Input.svelte";
-    import Mind3 from "./Mind3.svelte";
     import { createEventDispatcher } from "svelte";
 
     const dispatch = createEventDispatcher();
+    export let updateMind;
 
     let title = "";
     let x = 3035;
@@ -68,8 +68,7 @@
             .catch((error) => {
                 console.error("Error writing data", error);
             });
-
-        let parsedJson = JSON.parse(jsonOutput);
+        updateMind();
     }
 </script>
 

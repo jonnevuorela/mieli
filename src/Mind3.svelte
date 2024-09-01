@@ -2,6 +2,8 @@
     import { onMount } from "svelte";
     import { invoke } from "@tauri-apps/api";
     import { createEventDispatcher } from "svelte";
+    import { json } from "d3";
+    export let thoughts = [];
 
     const dispatch = createEventDispatcher();
 
@@ -27,7 +29,6 @@
     let trackX = 0;
     let trackY = 0;
 
-    let thoughts = [];
     let selectedThought = null;
     let activeIndex = null;
     let title = "";
@@ -64,7 +65,6 @@
         }
         mind.style.transform = `scale(${scale})`;
     });
-
     function findThoughtIndexById(activeThought) {
         return thoughts.findIndex((thought) => thought.id === activeThought);
     }
