@@ -2,7 +2,6 @@
     import { onMount } from "svelte";
     import { invoke } from "@tauri-apps/api";
     import { createEventDispatcher } from "svelte";
-    import { json } from "d3";
     export let thoughts = [];
 
     const dispatch = createEventDispatcher();
@@ -13,23 +12,18 @@
 
     let isPanning = false;
     let startPanPosition = { x: 0, y: 0 };
-    let panOffset = { x: 0, y: 0 };
 
     let isDragging = false;
     let mouseOffset = { x: 0, y: 0 };
     let mousePosition = { x: 0, y: 0 };
 
-    let isZooming = false;
-
     let isAnimating = false;
 
     let isConnecting = false;
-    let idConnecting = null;
     let connectingThought = null;
     let trackX = 0;
     let trackY = 0;
 
-    let selectedThought = null;
     let activeIndex = null;
     let title = "";
 
@@ -43,7 +37,6 @@
     let isMovingToTarget = false;
 
     const panSpeed = 1;
-    const zoomSpeed = 0.0005;
 
     onMount(async () => {
         try {
@@ -242,8 +235,8 @@
         isDragging = false;
     }
 
-    function handleDoubleClick(e) {
-        const toughtId = e.target.dataset.thoughtId;
+    function handleDoubleClick(selectedThought) {
+        const toughtId = selectedThought.target.dataset.thoughtId;
         const thought = thoughts.find((thought) => thought.id === +toughtId);
 
         if (thought) {
@@ -262,19 +255,21 @@
             mind.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`;
         }
     }
-    function handleClick(thoughtId) {
-        let relatedId = thoughtId;
-        let thought = thoughts.find((t) => t.id === thoughtId);
-        let coordinates = { x: thought.x, y: thought.y };
+    function handleRelated(selectedThought) {
+        let related = {
+            id: selectedThought.id,
+            x: selectedThought.x,
+            y: selectedThought.y,
+        };
 
-        console.log("relatedId (from Mind)", relatedId);
-        console.log("thoughts coordinates (from Mind)", thought.x, thought.y);
+        console.log("relatedId (from Mind)", related.id);
+        console.log("thoughts coordinates (from Mind)", related.x, related.y);
         console.log("------------------------");
 
-        dispatch("add", { relatedId, coordinates });
+        dispatch("passRelatedEntry", related);
     }
 
-    async function handleClickOk(e) {
+    async function handleClickOk(selectedThought) {
         console.log("okButtonClick");
         currentState = passiveMode;
 
@@ -337,11 +332,10 @@
             on:mousedown={handleDragStart}
             on:mouseup={handleDragEnd}
             on:dblclick={handleDoubleClick}
-            on:drop={handleDrop(thought.id)}
             class:blurred={currentState === inputMode}
             data-thought-id={thought.id}
         >
-            <button id="addRelated" on:click={handleClick(thought.id)}>
+            <button id="addRelated" on:click={() => handleRelated(thought)}>
                 <svg width="8" height="8">
                     <line x1="0" y1="4" x2="8" y2="4" stroke="white" />
                     <line x1="4" y1="0" x2="4" y2="8" stroke="white" />

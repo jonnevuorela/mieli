@@ -1,7 +1,6 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-use serde::de::value::StrDeserializer;
 use serde::{Deserialize, Serialize};
 use std::fs;
 use std::path::PathBuf;
@@ -62,7 +61,18 @@ fn read_json() -> Result<String, String> {
 
     // If the file doesn't exist, create it with an empty JSON array
     if !path.exists() {
-        std::fs::write(&path, "[]").expect("Failed to create thoughts.json");
+        std::fs::write(
+            &path,
+            r#"[{
+        "id": 1,
+        "title": "Mieli",
+        "relation_id": 0,
+        "x": 4500,
+        "y": 4500
+        }]"#,
+        )
+        .expect("Failed to create thoughts.json");
+        println!("File created{}", path.display());
     }
 
     //let json_content = include_str!("../src/thoughts.json");
@@ -95,7 +105,18 @@ fn write_json(data: String) {
 
     // If the file doesn't exist, create it with an empty JSON array
     if !path.exists() {
-        std::fs::write(&path, "[]").expect("Failed to create thoughts.json");
+        std::fs::write(
+            &path,
+            r#"[{
+        "id": 1,
+        "title": "Mieli",
+        "relation_id": 0,
+        "x": 4500,
+        "y": 4500
+        }]"#,
+        )
+        .expect("Failed to create thoughts.json");
+        println!("File created{}", path.display());
     }
 
     //let existing_data = fs::read_to_string("./src/thoughts.json");

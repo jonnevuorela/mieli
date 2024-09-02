@@ -1,0 +1,2 @@
+src/App.svelte|21 col 27-34 note| Parameter 'thought' implicitly has an 'any' type, but a better type may be inferred from usage.
+src/App.svelte|36 col 10-16 error| Type '{ updateMind: () => Promise<void>; }' is missing the following properties from type '{ updateMind: any; relatedId: any; coordinates: any; }': relatedId, coordinates

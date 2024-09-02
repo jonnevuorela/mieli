@@ -13,6 +13,7 @@
     let showMenu = false;
     let inputWindow = false;
     let thoughts = [];
+    let handledRelated = { id: null, coordinates: { x: null, y: null } };
 
     async function updateMind() {
         console.log("updateMind");
@@ -22,6 +23,11 @@
             if (thought.x === undefined) thought.x = 0;
             if (thought.y === undefined) thought.y = 0;
         });
+    }
+    function handleAdd() {
+        console.log("add event detail (from App)", handledRelated);
+        dispatch("handleAdd");
+        inputWindow = !inputWindow;
     }
 </script>
 
@@ -33,21 +39,28 @@
     {/if}
 
     {#if inputWindow}
-        <AddNew {updateMind} on:cancel={() => (inputWindow = !inputWindow)} />
+        <AddNew
+            {updateMind}
+            {handledRelated}
+            on:cancel={() => (inputWindow = !inputWindow)}
+        />
     {/if}
 
     <Mind3
         {thoughts}
-        on:add={(e) => {
-            dispatch("addRelated", {
-                relatedId: e.detail.relatedId,
-                coordinates: e.detail.coordinates,
-            });
-            inputWindow = !inputWindow;
-        }}
+        on:passRelatedEntry={(related) => (
+            (handledRelated = related.detail), handleAdd()
+        )}
+        on:add={() => (
+            (inputWindow = !inputWindow), console.log("input", inputWindow)
+        )}
     />
 
-    <Footer on:input={() => (inputWindow = !inputWindow)} />
+    <Footer
+        on:input={() => (
+            (inputWindow = !inputWindow), console.log("input", inputWindow)
+        )}
+    />
 </main>
 
 <style>

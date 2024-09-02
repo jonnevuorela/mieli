@@ -1,6 +1,5 @@
 <script>
     import { createEventDispatcher } from "svelte";
-    import AddNew from "./AddNew.svelte";
     import Mind3 from "./Mind3.svelte";
     const dispatch = createEventDispatcher();
 
@@ -22,7 +21,7 @@
         dispatch("cancel");
     }
 
-    function ok(e) {
+    function ok() {
         if (!relatedId) {
             relation_id = 0;
             x = 3035;
@@ -39,7 +38,7 @@
 
 <div id="inputWindow">
     <button id="inputCancel" on:click={cancel}>
-        <p>Xdd</p>
+        <p>X</p>
         <svg width="8" height="8" fill="currentColor">
             // cross for cancelling
 
