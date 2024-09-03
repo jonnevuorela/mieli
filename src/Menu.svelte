@@ -1,12 +1,22 @@
 <script>
     import { fly } from "svelte/transition";
+    import { invoke } from "@tauri-apps/api/tauri";
+    import { createEventDispatcher } from "svelte";
+
+    const dispatch = createEventDispatcher();
+
+    function clearData() {
+        invoke("delete_data");
+        dispatch("clearDataEvent");
+        console.log("clear data");
+    }
 </script>
 
 <div id="menu" transition:fly={{ y: 0, x: -200, duration: 500 }}>
     <nav>
         <a href="#">Menu Item 1</a>
         <a href="#">Menu Item 2</a>
-        <a href="#">Menu Item 3</a>
+        <a on:click={() => clearData()} href="#">Clear data</a>
     </nav>
 </div>
 

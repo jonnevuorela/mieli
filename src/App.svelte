@@ -35,7 +35,12 @@
     <Header on:toggleMenu={() => (showMenu = !showMenu)} />
 
     {#if showMenu}
-        <Menu />
+        <Menu
+            on:clearDataEvent={() => {
+                updateMind();
+                console.log("clear data event from App.svelte");
+            }}
+        />
     {/if}
 
     {#if inputWindow}

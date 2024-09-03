@@ -91,7 +91,6 @@ fn read_json() -> Result<String, String> {
 fn write_json(data: String) {
     // Get the application directory path
     let app_dir = app_data_dir(&tauri::Config::default()).expect("Failed to get app directory");
-
     let path: PathBuf = [app_dir.to_str().unwrap(), "thoughts.json"]
         .iter()
         .collect();
@@ -145,9 +144,31 @@ fn write_json(data: String) {
     //fs::write("./src/thoughts.json", serialized_data).expect("Failed to write file");
     fs::write(&path, serialized_data).expect("Failed to write file");
 }
+#[tauri::command]
+fn delete_data() {
+    // get the application directory path
+    let app_dir = app_data_dir(&tauri::Config::default()).expect("Failed to get app directory");
+    let path: PathBuf = [app_dir.to_str().unwrap(), "thoughts.json"]
+        .iter()
+        .collect();
+    // delete file if exists and call read function to create new file
+    if path.exists() {
+        std::fs::remove_file(&path).expect("Failed to delete file");
+        read_json().expect("Failed to read file");
+    }
+    // dirty handling for file not found
+    else {
+        println!("File not found{}", path.display());
+    }
+}
 fn main() {
     tauri::Builder::default()
-        .invoke_handler(tauri::generate_handler![get_last_id, write_json, read_json])
+        .invoke_handler(tauri::generate_handler![
+            get_last_id,
+            write_json,
+            read_json,
+            delete_data
+        ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
