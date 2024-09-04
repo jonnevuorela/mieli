@@ -12,6 +12,7 @@ struct Thought {
     id: u32,
     title: String,
     relation_id: u32,
+    added_relation_id: u32,
     x: u32,
     y: u32,
 }
@@ -67,6 +68,7 @@ fn read_json() -> Result<String, String> {
         "id": 1,
         "title": "Mieli",
         "relation_id": 0,
+        "added_relation_id": 0,
         "x": 4500,
         "y": 4500
         }]"#,
@@ -110,6 +112,7 @@ fn write_json(data: String) {
         "id": 1,
         "title": "Mieli",
         "relation_id": 0,
+        "added_relation_id": 0,
         "x": 4500,
         "y": 4500
         }]"#,

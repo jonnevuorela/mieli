@@ -1,6 +1,6 @@
 <script>
     import { onMount } from "svelte";
-    import { invoke } from "@tauri-apps/api";
+    import { event, invoke } from "@tauri-apps/api";
     import { createEventDispatcher } from "svelte";
     export let thoughts = [];
 
@@ -17,15 +17,12 @@
     let mouseOffset = { x: 0, y: 0 };
     let mousePosition = { x: 0, y: 0 };
 
-    let isAnimating = false;
-
     let isConnecting = false;
     let connectingThought = null;
     let trackX = 0;
     let trackY = 0;
 
     let activeIndex = null;
-    let title = "";
 
     let mind;
     let scale = 0.5;
@@ -33,10 +30,6 @@
     let mouseY = 0;
 
     let targetTranslate = { x: 0, y: 0 };
-    let currentTranslate = { x: 0, y: 0 };
-    let isMovingToTarget = false;
-
-    const panSpeed = 1;
 
     onMount(async () => {
         try {
@@ -81,29 +74,9 @@
         }
     }
     function handleWheel(e) {
+        // disable scrolling
         e.preventDefault();
-
-        checkBorders(); // Ensure the content stays within bounds
     }
-    function moveToTarget(speed, scale) {
-        const dx = targetTranslate.x - currentTranslate.x;
-        const dy = targetTranslate.y - currentTranslate.y;
-
-        currentTranslate.x = dx * speed;
-        currentTranslate.y = dy * speed;
-
-        mind.style.transform = `translate(${currentTranslate.x}px, ${currentTranslate.y}px) scale(${scale})`;
-
-        if (Math.abs(dx) < 0.1 && Math.abs(dy) < 0.1) {
-            isAnimating = false;
-            isMovingToTarget = false;
-            console.log("isAnimating", isAnimating);
-        } else {
-            // Continue the animation.
-            window.requestAnimationFrame(() => moveToTarget(panSpeed));
-        }
-    }
-
     function handleMouseDown(e) {
         e.preventDefault();
         if (e.target.classList.contains("thought")) {
@@ -123,19 +96,21 @@
             x: e.clientX / scale,
             y: e.clientY / scale,
         };
-
         const svgRect = mind.getBoundingClientRect();
         trackX = (e.clientX - svgRect.left) / scale;
         trackY = (e.clientY - svgRect.top) / scale;
 
         if (isPanning) {
-            console.log("Panning");
             const dx = e.clientX - startPanPosition.x;
             const dy = e.clientY - startPanPosition.y;
             startPanPosition = { x: e.clientX, y: e.clientY };
             panMind(dx, dy);
         } else if (isDragging) {
             handleDragMove(adjustedMousePosition);
+        } else if (isConnecting) {
+            // Ensure line updates
+            trackX = trackX;
+            trackY = trackY;
         }
     }
 
@@ -147,13 +122,9 @@
         const mind = document.getElementById("mind");
         const style = window.getComputedStyle(mind);
         const matrix = new DOMMatrix(style.transform);
-
         targetTranslate.x = matrix.m41 + dx;
         targetTranslate.y = matrix.m42 + dy;
-
         checkBorders();
-
-        //mind.style.transform = `translate(${targetTranslate.x}px, ${targetTranslate.y}px) scale(${scale})`;
         mind.style.transform = `matrix(${matrix.a}, ${matrix.b}, ${matrix.c}, ${matrix.d}, ${targetTranslate.x}, ${targetTranslate.y})`;
     }
 
@@ -235,82 +206,75 @@
         isDragging = false;
     }
 
-    function handleDoubleClick(selectedThought) {
-        const toughtId = selectedThought.target.dataset.thoughtId;
-        const thought = thoughts.find((thought) => thought.id === +toughtId);
-
-        if (thought) {
-            const centerX = window.innerWidth / 2;
-            const centerY = window.innerHeight / 2;
-
-            const thoughtCenterX = thought.x + 50;
-            const thoughtCenterY = thought.y + 50;
-
-            const translateX = centerX - thought.x * scale;
-            const translateY = centerY - thought.y * scale;
-
-            scale = 2;
-
-            mind.style.transformOrigin = `${thoughtCenterX}px ${thoughtCenterY}px`;
-            mind.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`;
-        }
-    }
     function handleRelated(selectedThought) {
         let related = {
             id: selectedThought.id,
             x: selectedThought.x,
             y: selectedThought.y,
         };
-
-        console.log("relatedId (from Mind)", related.id);
-        console.log("thoughts coordinates (from Mind)", related.x, related.y);
-        console.log("------------------------");
-
         dispatch("passRelatedEntry", related);
     }
-
-    async function handleClickOk(selectedThought) {
-        console.log("okButtonClick");
-        currentState = passiveMode;
-
-        if (!selectedThought) {
-            console.error("No thought selected");
-            return;
-        }
-        console.log("selectedThought.id", selectedThought.id);
-
-        const lastId = await invoke("get_last_id");
-        const newId = lastId + 1;
-
-        const jsonOutput = JSON.stringify([
-            {
-                title,
-                id: newId,
-                x: selectedThought.x,
-                y: selectedThought.y + 100,
-                relation_id: selectedThought.id,
-            },
-        ]);
-
-        await invoke("write_json", { data: jsonOutput })
-            .then(() => {
-                console.log("Data passed to backend");
-            })
-            .catch((error) => {
-                console.error("Error writing data", error);
-            });
-    }
-
+    let added_relation_id = null;
     function connectStart(thoughtId) {
         isConnecting = true;
         connectingThought = thoughts.find((t) => t.id === thoughtId);
-        window.addEventListener("drag", handleMouseMove);
+        console.log("connectingThought", connectingThought);
+        added_relation_id = connectingThought.id;
     }
-
-    function connectEnd() {
+    function connectEnd(e) {
         isConnecting = false;
-        connectingThought = null;
-        window.removeEventListener("drag", handleMouseMove);
+        let thought = document.getElementById("thought");
+
+        // Log if thought element is found
+        if (thought) {
+            console.log(`Thought Element Found: ID = ${thought.id}`);
+        } else {
+            console.log("Thought element not found.");
+            return; // Exit if thought is not found
+        }
+
+        if (document.elementsFromPoint) {
+            // Log mouse coordinates
+            console.log(`Mouse Coordinates: (${e.clientX}, ${e.clientY})`);
+
+            // Get elements from point
+            let elements = document.elementsFromPoint(e.clientX, e.clientY);
+            console.log("Elements from point:", elements);
+
+            let thoughtIdLogged = false; // Flag to check if thought id is logged
+
+            for (var i = 0; i < elements.length; i++) {
+                // Append the localName of the element to the thought text
+                thought.textContent += elements[i].localName;
+
+                // Log the id of the current element
+                console.log(`Element ID: ${elements[i].id}`);
+
+                // Check if the current element matches the thought element
+                if (elements[i] === thought) {
+                    console.log(`Element ID: ${thought.id}`); // Log the thought id
+                    thoughtIdLogged = true;
+                }
+
+                if (i < elements.length - 1) {
+                    thought.textContent += " < ";
+                }
+            }
+
+            // Log a message if the thought id was not found in the elements
+            if (!thoughtIdLogged) {
+                console.log(
+                    "Thought element ID not found in elements from point.",
+                );
+            } else {
+                console.log("Thought element ID found in elements from point.");
+            }
+        } else {
+            thought.innerHTML =
+                '<span style="color: red;">' +
+                "Browser does not support <code>document.elementsFromPoint()</code>" +
+                "</span>";
+        }
     }
 </script>
 
@@ -328,10 +292,10 @@
             role="application"
             bind:this={thought.el}
             class="thought"
+            id={thought.id}
             style="left: {thought.x}px; top: {thought.y}px;"
             on:mousedown={handleDragStart}
             on:mouseup={handleDragEnd}
-            on:dblclick={handleDoubleClick}
             class:blurred={currentState === inputMode}
             data-thought-id={thought.id}
         >
@@ -354,7 +318,6 @@
         </div>
         {#if isConnecting && connectingThought}
             <svg
-                class:blurred={currentState === inputMode}
                 style="position:absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none;"
             >
                 <line
@@ -378,6 +341,22 @@
                         50}
                     y2={thoughts.find((t) => t.id === thought.relation_id).y +
                         50}
+                    stroke="white"
+                />
+            </svg>
+        {/if}
+        {#if thought.added_relation_id}
+            <svg
+                class:blurred={currentState === inputMode}
+                style="position:absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none;"
+            >
+                <line
+                    x1={thought.x + 50}
+                    y1={thought.y + 50}
+                    x2={thoughts.find((t) => t.id === thought.added_relation_id)
+                        .x + 50}
+                    y2={thoughts.find((t) => t.id === thought.added_relation_id)
+                        .y + 50}
                     stroke="white"
                 />
             </svg>
@@ -444,6 +423,7 @@
         min-height: 769vh;
         transform-origin: 50% 50%;
         border: 1px solid white;
+        z-index: 0;
     }
     #mind:active {
         cursor: grabbing;
@@ -488,5 +468,8 @@
         top: 0;
         width: 1em;
         height: 1em;
+    }
+    svg {
+        pointer-events: none; /* Prevents SVG from capturing mouse events */
     }
 </style>

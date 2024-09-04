@@ -60,6 +60,7 @@
                 x: handledRelated.x + 100 ? x : x,
                 y: handledRelated.y + 100 ? y : y,
                 relation_id: handledRelated.id ? handledRelated.id : 0,
+                added_relation_id: 0,
             },
         ]);
 
