@@ -216,64 +216,23 @@
     }
     let added_relation_id = null;
     function connectStart(thoughtId) {
-        isConnecting = true;
-        connectingThought = thoughts.find((t) => t.id === thoughtId);
-        console.log("connectingThought", connectingThought);
-        added_relation_id = connectingThought.id;
+        if (isConnecting) {
+            isConnecting = false;
+            added_relation_id = null;
+        } else {
+            isConnecting = true;
+            connectingThought = thoughts.find((t) => t.id === thoughtId);
+            console.log("connectingThought", connectingThought);
+            added_relation_id = connectingThought.id;
+        }
     }
+
     function connectEnd(e) {
         isConnecting = false;
-        let thought = document.getElementById("thought");
-
-        // Log if thought element is found
-        if (thought) {
-            console.log(`Thought Element Found: ID = ${thought.id}`);
+        // Use the added_relation variable to simulate the click
+        if (added_relation_id) {
         } else {
-            console.log("Thought element not found.");
-            return; // Exit if thought is not found
-        }
-
-        if (document.elementsFromPoint) {
-            // Log mouse coordinates
-            console.log(`Mouse Coordinates: (${e.clientX}, ${e.clientY})`);
-
-            // Get elements from point
-            let elements = document.elementsFromPoint(e.clientX, e.clientY);
-            console.log("Elements from point:", elements);
-
-            let thoughtIdLogged = false; // Flag to check if thought id is logged
-
-            for (var i = 0; i < elements.length; i++) {
-                // Append the localName of the element to the thought text
-                thought.textContent += elements[i].localName;
-
-                // Log the id of the current element
-                console.log(`Element ID: ${elements[i].id}`);
-
-                // Check if the current element matches the thought element
-                if (elements[i] === thought) {
-                    console.log(`Element ID: ${thought.id}`); // Log the thought id
-                    thoughtIdLogged = true;
-                }
-
-                if (i < elements.length - 1) {
-                    thought.textContent += " < ";
-                }
-            }
-
-            // Log a message if the thought id was not found in the elements
-            if (!thoughtIdLogged) {
-                console.log(
-                    "Thought element ID not found in elements from point.",
-                );
-            } else {
-                console.log("Thought element ID found in elements from point.");
-            }
-        } else {
-            thought.innerHTML =
-                '<span style="color: red;">' +
-                "Browser does not support <code>document.elementsFromPoint()</code>" +
-                "</span>";
+            console.error("No starting thought ID found.");
         }
     }
 </script>
@@ -308,7 +267,7 @@
             <button
                 id="connect"
                 draggable="true"
-                on:dragstart={() => connectStart(thought.id)}
+                on:click={() => connectStart(thought.id)}
                 on:dragend={connectEnd}
             />
 
