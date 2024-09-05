@@ -59,6 +59,7 @@
         on:add={() => (
             (inputWindow = !inputWindow), console.log("input", inputWindow)
         )}
+        on:update={() => updateMind()}
     />
 
     <Footer

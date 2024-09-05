@@ -215,25 +215,41 @@
         dispatch("passRelatedEntry", related);
     }
     let added_relation_id = null;
-    function connectStart(thoughtId) {
-        if (isConnecting) {
-            isConnecting = false;
-            added_relation_id = null;
-        } else {
+    function connectStart(thoughtId, event) {
+        event.stopPropagation();
+        if (!isConnecting) {
             isConnecting = true;
             connectingThought = thoughts.find((t) => t.id === thoughtId);
             console.log("connectingThought", connectingThought);
             added_relation_id = connectingThought.id;
+        } else if (isConnecting && added_relation_id) {
+            console.log("added_relation_id", added_relation_id);
+            const target = thoughts.find((t) => t.id === thoughtId);
+            console.log("target", target.id);
+            invoke("update_json", {
+                addedrelationid: Number(added_relation_id),
+                targetid: Number(target.id),
+            })
+                .then(() => {
+                    console.log("relation added");
+                    added_relation_id = null;
+                    isConnecting = false;
+                    dispatch("update");
+                })
+                .catch((error) => {
+                    console.error("Error adding relation", error);
+                });
+        } else if (!added_relation_id) {
+            console.error("No starting thought ID found.(connectEnd)");
+            isConnecting = false;
+            added_relation_id = null;
         }
     }
-
-    function connectEnd(e) {
+    function connectEnd() {
         isConnecting = false;
-        // Use the added_relation variable to simulate the click
-        if (added_relation_id) {
-        } else {
-            console.error("No starting thought ID found.");
-        }
+        connectingThought = null;
+        added_relation_id = null;
+        console.log("connectEnd");
     }
 </script>
 
@@ -245,6 +261,7 @@
     on:mouseup={handleMouseUp}
     on:mousemove={handleMouseMove}
     on:wheel={handleWheel}
+    on:click={isConnecting ? connectEnd : null}
 >
     {#each thoughts as thought (thought.id)}
         <div
@@ -267,8 +284,9 @@
             <button
                 id="connect"
                 draggable="true"
-                on:click={() => connectStart(thought.id)}
-                on:dragend={connectEnd}
+                on:click={(event) => {
+                    connectStart(thought.id, event);
+                }}
             />
 
             <div id="thoughtTitle">

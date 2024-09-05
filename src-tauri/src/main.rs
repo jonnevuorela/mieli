@@ -164,13 +164,42 @@ fn delete_data() {
         println!("File not found{}", path.display());
     }
 }
+#[tauri::command]
+fn update_json(targetid: u32, addedrelationid: u32) {
+    // get the application directory path
+    let app_dir = app_data_dir(&tauri::Config::default()).expect("Failed to get app directory");
+    let path: PathBuf = [app_dir.to_str().unwrap(), "thoughts.json"]
+        .iter()
+        .collect();
+
+    // check if file exists
+    if path.exists() {
+        // read file and parse JSON
+        let data: String = fs::read_to_string(&path).expect("Failed to read file");
+        let mut thoughts: Vec<Thought> = serde_json::from_str(&data).expect("Failed to parse JSON");
+
+        // check matching id and update added_relation_id
+        if let Some(thought) = thoughts.iter_mut().find(|t| t.id == targetid) {
+            thought.added_relation_id = addedrelationid;
+        } else {
+            println!("Thought with id {} not found", targetid);
+        }
+        let updated_data =
+            serde_json::to_string_pretty(&thoughts).expect("Failed to serialize data");
+
+        fs::write(&path, updated_data).expect("Failed to write file");
+    } else {
+        println!("File not found{}", path.display());
+    }
+}
 fn main() {
     tauri::Builder::default()
         .invoke_handler(tauri::generate_handler![
             get_last_id,
             write_json,
             read_json,
-            delete_data
+            delete_data,
+            update_json
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
