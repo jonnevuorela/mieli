@@ -69,7 +69,7 @@ fn read_json() -> Result<String, String> {
         "title": "Mieli",
         "relation_id": 0,
         "added_relation_id": 0,
-        "x": 4500,
+        "x": 8000,
         "y": 4500
         }]"#,
         )
@@ -113,7 +113,7 @@ fn write_json(data: String) {
         "title": "Mieli",
         "relation_id": 0,
         "added_relation_id": 0,
-        "x": 4500,
+        "x": 8000,
         "y": 4500
         }]"#,
         )

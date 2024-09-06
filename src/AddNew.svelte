@@ -9,8 +9,8 @@
     export let handledRelated;
 
     let title = "";
-    let x = 4200;
-    let y = 4200;
+    let x = 8200;
+    let y = 4700;
 
     let jsonOutput;
 

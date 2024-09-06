@@ -255,6 +255,7 @@
 
 <div
     id="mind"
+    class="mind"
     role="main"
     bind:this={mind}
     on:mousedown={handleMouseDown}
@@ -275,21 +276,25 @@
             class:blurred={currentState === inputMode}
             data-thought-id={thought.id}
         >
-            <button id="addRelated" on:click={() => handleRelated(thought)}>
-                <svg width="8" height="8">
-                    <line x1="0" y1="4" x2="8" y2="4" stroke="white" />
-                    <line x1="4" y1="0" x2="4" y2="8" stroke="white" />
-                </svg>
-            </button>
-            <button
-                id="connect"
-                draggable="true"
-                on:click={(event) => {
-                    connectStart(thought.id, event);
-                }}
-            />
+            <div class="row1">
+                <button
+                    class="connect"
+                    on:click={(event) => {
+                        connectStart(thought.id, event);
+                    }}
+                />
 
-            <div id="thoughtTitle">
+                <button
+                    class="addRelated"
+                    on:click={() => handleRelated(thought)}
+                >
+                    <svg width="8" height="8">
+                        <line x1="0" y1="4" x2="8" y2="4" stroke="black" />
+                        <line x1="4" y1="0" x2="4" y2="8" stroke="black" />
+                    </svg>
+                </button>
+            </div>
+            <div class="thoughtTitle">
                 {thought.title}
             </div>
         </div>
@@ -298,11 +303,11 @@
                 style="position:absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none;"
             >
                 <line
-                    x1={connectingThought.x}
-                    y1={connectingThought.y}
+                    x1={connectingThought.x + 30}
+                    y1={connectingThought.y + 30}
                     x2={trackX}
                     y2={trackY}
-                    stroke="white"
+                    stroke="rgb(204, 170, 0)"
                 />
             </svg>
         {/if}
@@ -312,29 +317,29 @@
                 style="position:absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none;"
             >
                 <line
-                    x1={thought.x + 50}
-                    y1={thought.y + 50}
+                    x1={thought.x + 100}
+                    y1={thought.y + 75}
                     x2={thoughts.find((t) => t.id === thought.relation_id).x +
-                        50}
+                        100}
                     y2={thoughts.find((t) => t.id === thought.relation_id).y +
-                        50}
-                    stroke="white"
+                        75}
+                    stroke="rgb(204, 170, 0)"
                 />
             </svg>
         {/if}
         {#if thought.added_relation_id}
             <svg
                 class:blurred={currentState === inputMode}
-                style="position:absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none;"
+                style="position:absolute; top: 0; left: 0; width: 100%; height: 100%;"
             >
                 <line
-                    x1={thought.x + 50}
-                    y1={thought.y + 50}
+                    x1={thought.x + 100}
+                    y1={thought.y + 75}
                     x2={thoughts.find((t) => t.id === thought.added_relation_id)
-                        .x + 50}
+                        .x + 100}
                     y2={thoughts.find((t) => t.id === thought.added_relation_id)
-                        .y + 50}
-                    stroke="white"
+                        .y + 75}
+                    stroke="rgb(204, 170, 0)"
                 />
             </svg>
         {/if}
@@ -342,91 +347,61 @@
 </div>
 
 <style>
-    .blurred {
-        filter: blur(5px);
-    }
-    #inputWindow {
-        position: fixed;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        background-color: midnightblue;
-        border: 0.1em groove black;
-        border-radius: 0.5em;
-        height: 6em;
-        padding: 10px;
-        z-index: 3;
-    }
-    #textInput {
-        background-color: transparent;
-        border: none;
-
-        color: white;
-        font-size: 1em;
-        bottom: 0;
-        left: 0;
-        margin: 0 10px;
-        width: 100%;
-    }
-    #inputOk {
-        background-color: transparent;
-        border: 1px solid white;
-        color: white;
-        font-size: 1em;
-        bottom: 0;
-        right: 0;
-        margin: 10px;
-        padding: 5px;
-        width: fit-content;
-        height: fit-content;
-    }
-    #inputCancel {
-        background-color: transparent;
-        border: 1px solid white;
-        color: white;
-        top: 0;
-        left: 0;
-        font-size: 1em;
-        margin: 10px;
-        padding: 5px;
-        width: fit-content;
-        height: fit-content;
-    }
-
-    #mind {
+    .mind {
         position: absolute;
         background-color: black;
-        width: 769vw;
-        min-height: 769vh;
+        background-image: url("/mind_background.png");
+        background-size: cover;
+        background-repeat: no-repeat;
+        background-position: center;
+        width: 16000px;
+        min-height: 9000px;
         transform-origin: 50% 50%;
         border: 1px solid white;
         z-index: 0;
     }
-    #mind:active {
+    .mind:active {
         cursor: grabbing;
     }
 
+    .row1 {
+        display: flex;
+        flex-direction: row;
+        margin-left: 35px;
+        margin-top: 30px;
+        margin-right: 50px;
+        justify-content: space-between;
+        align-items: center;
+        background-color: transparent;
+    }
     .thought {
         position: absolute;
-
-        font: 1.5em sans-serif;
-        width: 4em;
-        height: 4em;
-        background-color: maroon;
+        display: flex;
+        flex-direction: column;
+        width: 250px;
+        height: 175px;
+        background-color: rgba(0, 0, 0, 0);
+        background-image: url("/thought.png");
+        background-size: cover;
+        background-repeat: no-repeat;
         z-index: 2;
     }
-    #thoughtTitle {
+    .thoughtTitle {
+        position: absolute;
+        bottom: 60px;
         display: flex;
         flex-direction: column;
         background-color: transparent;
-        color: white;
-        font-size: 1em;
+        font-size: 38px;
+        -webkit-text-stroke: 1px black;
+        -webkit-text-fill-color: darkgoldenrod;
         margin: 0;
-        padding: 0;
+        padding-top: 15px;
         width: 100%;
         text-align: center;
+        -webkit-user-select: none;
     }
-    #addRelated {
+    .addRelated {
         background-color: transparent;
         border: none;
         color: white;
@@ -437,16 +412,24 @@
         width: 1em;
         height: 1em;
     }
-    #connect {
-        border: solid 1px black;
-        color: white;
-        font-size: 1em;
-        right: 0;
-        top: 0;
-        width: 1em;
-        height: 1em;
+    .connect {
+        position: absolute;
+        background-color: transparent;
+        background-image: url("/thought_connect.png");
+        background-size: cover;
+        background-repeat: no-repeat;
+        border: none;
+        top: 40px;
+        left: 35px;
+        width: 40px;
+        height: 29.2px;
+        -webkit-transition:
+            transform 0.3s ease,
+            top 0.3s ease,
+            left 0.3s ease;
     }
-    svg {
-        pointer-events: none; /* Prevents SVG from capturing mouse events */
+    .connect:hover {
+        top: 35px;
+        -webkit-transform: scale(1.25) rotate(-10deg);
     }
 </style>
