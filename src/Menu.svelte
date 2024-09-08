@@ -12,24 +12,26 @@
     }
 </script>
 
-<div id="menu" transition:fly={{ y: 0, x: -200, duration: 500 }}>
+<div class="menu" transition:fly={{ y: 0, x: -200, duration: 500 }}>
     <nav>
-        <a href="#">Menu Item 1</a>
-        <a href="#">Menu Item 2</a>
         <a on:click={() => clearData()} href="#">Clear data</a>
     </nav>
 </div>
 
 <style>
-    #menu {
+    .menu {
         position: fixed;
         display: flex;
         flex-direction: column;
         top: 2.7em;
         left: 0;
-        background-color: midnightblue;
-        border-right: 1px groove black;
-        width: 10em;
+        background: rgb(0, 0, 0);
+        background: linear-gradient(
+            90deg,
+            rgba(0, 0, 0, 1) 75%,
+            rgba(0, 0, 0, 0) 100%
+        );
+        width: 20%;
         height: 100vh;
         z-index: 1000;
     }
@@ -37,8 +39,8 @@
         display: flex;
         flex-direction: column;
         padding-top: 1em;
+        padding-left: 1em;
         gap: 1em;
-        align-items: center;
         height: 100%;
     }
     a {

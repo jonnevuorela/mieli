@@ -26,8 +26,12 @@
         justify-content: center;
         align-items: center;
         bottom: 0;
-        background-color: midnightblue;
-        border-top: 1px groove black;
+        background: rgb(0, 0, 0);
+        background: radial-gradient(
+            circle,
+            rgba(0, 0, 0, 1) 20%,
+            rgba(0, 0, 0, 0) 100%
+        );
         width: 100%;
         height: 2.7em;
         z-index: 1000;

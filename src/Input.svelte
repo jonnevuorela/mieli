@@ -36,8 +36,8 @@
 
 <Mind3 on:add={handleAdd} />
 
-<div id="inputWindow">
-    <button id="inputCancel" on:click={cancel}>
+<div class="inputWindow">
+    <button class="inputCancel" on:click={cancel}>
         <p>X</p>
         <svg width="8" height="8" fill="currentColor">
             // cross for cancelling
@@ -45,17 +45,17 @@
             <path d="M0 0 L8 8 M8 0 L0 8" stroke="white" stroke-width="2" />
         </svg>
     </button>
-    <input id="textInput" type="text" bind:value={title} />
-    <button id="inputOk" on:click={ok}> OK </button>
+    <input class="textInput" type="text" bind:value={title} />
+    <button class="inputOk" on:click={ok}> OK </button>
 </div>
 
 <style>
-    #inputWindow {
+    .inputWindow {
         position: fixed;
         top: 50%;
         left: 50%;
         transform: translate(-50%, -50%);
-        background-color: midnightblue;
+        background-color: black;
         border: 0.1em groove black;
         border-radius: 0.5em;
         height: 6em;

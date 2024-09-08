@@ -8,8 +8,8 @@
     }
 </script>
 
-<div id="header">
-    <button on:click={toggleMenu} id="menuButton">
+<div class="header">
+    <button on:click={toggleMenu} class="menuButton">
         <svg
             xmlns="http://www.w3.org/2000/svg"
             width="16"
@@ -21,7 +21,7 @@
             />
         </svg>
     </button>
-    <button id="settingsButton">
+    <button class="settingsButton">
         <svg
             xmlns="http://www.w3.org/2000/svg"
             width="16"
@@ -37,28 +37,26 @@
 </div>
 
 <style>
-    #header {
+    .header {
         position: fixed;
         display: flex;
         flex-direction: row;
         top: 0;
-        background-color: midnightblue;
-        border-bottom: 1px groove black;
+        background-color: black;
         width: 100%;
         height: 2.7em;
         z-index: 1000;
     }
 
-    #header::after {
+    .header::after {
         content: "";
         display: table;
         clear: both;
     }
 
-    #menuButton {
+    .menuButton {
         position: absolute;
         left: 0;
-        background-color: midnightblue;
         border: none;
         color: white;
         padding: 10px 20px;
@@ -70,10 +68,9 @@
         cursor: pointer;
     }
 
-    #settingsButton {
+    .settingsButton {
         position: absolute;
         right: 0;
-        background-color: midnightblue;
         border: none;
         color: white;
         padding: 10px 20px;
