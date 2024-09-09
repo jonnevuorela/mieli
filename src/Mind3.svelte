@@ -251,6 +251,32 @@
         added_relation_id = null;
         console.log("connectEnd");
     }
+    function handleDelete(thoughtId) {
+        const thoughtIndex = thoughts.findIndex((t) => t.id === thoughtId) + 1;
+        invoke("delete_entry", { targetid: Number(thoughtIndex) })
+            .then(() => {
+                console.log("thought deleted");
+                dispatch("update");
+            })
+            .catch((error) => {
+                console.error("Error deleting thought", error);
+            });
+    }
+    function handleDisconnect(thoughtId) {
+        const thoughtIndex = thoughts.findIndex((t) => t.id === thoughtId);
+        thoughts[thoughtIndex].relation_id = 0;
+        thoughts[thoughtIndex].added_relation_id = 0;
+        console.log("thoughts[thoughtIndex]", thoughts[thoughtIndex]);
+        const data = JSON.stringify(thoughts);
+        invoke("write_json", { data })
+            .then(() => {
+                console.log("relation deleted");
+                dispatch("update");
+            })
+            .catch((error) => {
+                console.error("Error deleting relation", error);
+            });
+    }
 </script>
 
 <div
@@ -282,16 +308,26 @@
                     on:click={(event) => {
                         connectStart(thought.id, event);
                     }}
-                />
+                >
+                    <img src="/thought_connect.svg" alt="connect" />
+                </button>
 
+                <button
+                    class="delete"
+                    on:click={() => handleDelete(thought.id)}
+                >
+                    <img src="/thought_delete.svg" alt="delete" />
+                </button>
+                <button
+                    class="disconnect"
+                    on:click={() => handleDisconnect(thought.id)}
+                >
+                    <img src="/thought_disconnect.svg" alt="disconnect" />
+                </button>
                 <button
                     class="addRelated"
                     on:click={() => handleRelated(thought)}
                 >
-                    <svg width="8" height="8">
-                        <line x1="0" y1="4" x2="8" y2="4" stroke="black" />
-                        <line x1="4" y1="0" x2="4" y2="8" stroke="black" />
-                    </svg>
                 </button>
             </div>
             <div class="thoughtTitle">
@@ -401,23 +437,48 @@
         text-align: center;
         -webkit-user-select: none;
     }
-    .addRelated {
+    .disconnect {
+        position: absolute;
         background-color: transparent;
+        background-image: url("/thought_disconnect.png");
+        background-size: cover;
+        background-repeat: no-repeat;
+        border: none;
+        top: 100px;
+        left: 10px;
+        width: 40px;
+        height: auto;
+    }
+    .disconnect:hover {
+        -webkit-transform: scale(1.25) rotate(10deg);
+    }
+    .delete {
+        position: absolute;
+        background-color: transparent;
+        background-image: url("/thought_delete.png");
+        background-size: cover;
+        background-repeat: no-repeat;
+        border: none;
+        top: 100px;
+        right: 10px;
+    }
+    .delete:hover {
+        -webkit-transform: scale(1.25) rotate(-10deg);
+    }
+    .addRelated {
+        position: absolute;
+        background-color: transparent;
+        top: 40px;
+        right: 35px;
         border: none;
         color: white;
         font-size: 1em;
-        left: 0;
-        top: 0;
-
         width: 1em;
         height: 1em;
     }
     .connect {
         position: absolute;
         background-color: transparent;
-        background-image: url("/thought_connect.png");
-        background-size: cover;
-        background-repeat: no-repeat;
         border: none;
         top: 40px;
         left: 35px;
