@@ -31,6 +31,7 @@
         }
         dispatch("ok", { title, x, y, relation_id });
         console.log("ok (from Input)", title);
+        cancel();
     }
 </script>
 
@@ -39,11 +40,6 @@
 <div class="inputWindow">
     <button class="inputCancel" on:click={cancel}>
         <p>X</p>
-        <svg width="8" height="8" fill="currentColor">
-            // cross for cancelling
-
-            <path d="M0 0 L8 8 M8 0 L0 8" stroke="white" stroke-width="2" />
-        </svg>
     </button>
     <input class="textInput" type="text" bind:value={title} />
     <button class="inputOk" on:click={ok}> OK </button>
@@ -55,11 +51,42 @@
         top: 50%;
         left: 50%;
         transform: translate(-50%, -50%);
-        background-color: black;
-        border: 0.1em groove black;
-        border-radius: 0.5em;
+        background-color: rgba(20, 20, 20, 0.8);
         height: 6em;
-        padding: 10px;
+        width: 20em;
         z-index: 3;
+    }
+    .inputCancel {
+        position: absolute;
+        top: 0;
+        left: 0;
+        border: none;
+        width: 1.5em;
+        height: 1.5em;
+        font-size: 1em;
+        color: white;
+        background: transparent;
+        padding-bottom: 1.5em;
+    }
+    .textInput {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 80%;
+        height: 1.5em;
+        font-size: 1em;
+        border: none;
+    }
+    .inputOk {
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        border: none;
+        height: 1.5em;
+        font-size: 1em;
+        color: white;
+        background: transparent;
+        padding-bottom: 1.5em;
     }
 </style>
